@@ -339,10 +339,10 @@ python manage.py runserver 8001  # ou outra porta
 
 ## 👨‍💻 Autores
 
-Felipe Costa da Silva
-Sofia Caldas Sampaio
-Carlos Fabian Lamego Fernandes Junior
-Fernando Peixoto Ferreira
+- Felipe Costa da Silva
+- Sofia Caldas Sampaio
+- Carlos Fabian Lamego Fernandes Junior
+- Fernando Peixoto Ferreira
 
 
 Sistema RH desenvolvido como projeto educacional em Django.
