@@ -1,0 +1,149 @@
+{% extends "core/base.html" %}
+{% load crispy_forms_tags %}
+{% block title %}{{ titulo }} - Sistema RH{% endblock %}
+{% block content %}
+
+<!-- PAGE HEADER -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="page-title mb-0">
+        <i class="bi bi-person-plus-fill"></i>{{ titulo }}
+    </h1>
+    <a class="btn btn-fb-secondary" href="{% url 'core:funcionario_list' %}">
+        <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+</div>
+
+<!-- FORM CARD -->
+<div class="card-fb">
+    <div class="card-header" style="background: var(--bg-active); border: none;">
+        <h5 class="mb-0" style="color: white; font-weight: 700;">
+            <i class="bi bi-pencil-square"></i> Preencha os dados do funcionário
+        </h5>
+    </div>
+    <div class="card-body" style="padding: 2rem;">
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            <!-- NOME -->
+            <div class="mb-3">
+                <label for="{{ form.nome.id_for_label }}" class="form-label-fb">
+                    <i class="bi bi-person"></i> Nome Completo
+                </label>
+                {{ form.nome }}
+                {% if form.nome.errors %}
+                    <div class="alert-fb alert-danger-fb mt-2">
+                        {{ form.nome.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- CPF -->
+            <div class="mb-3">
+                <label for="{{ form.cpf.id_for_label }}" class="form-label-fb">
+                    <i class="bi bi-credit-card"></i> CPF
+                </label>
+                {{ form.cpf }}
+                <small class="text-muted" style="display: block; margin-top: 0.5rem;">
+                    Formato: XXX.XXX.XXX-XX
+                </small>
+                {% if form.cpf.errors %}
+                    <div class="alert-fb alert-danger-fb mt-2">
+                        {{ form.cpf.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- CARGO -->
+            <div class="mb-3">
+                <label for="{{ form.cargo.id_for_label }}" class="form-label-fb">
+                    <i class="bi bi-briefcase"></i> Cargo
+                </label>
+                {{ form.cargo }}
+                {% if form.cargo.errors %}
+                    <div class="alert-fb alert-danger-fb mt-2">
+                        {{ form.cargo.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- SALÁRIO E DATA -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="{{ form.salario.id_for_label }}" class="form-label-fb">
+                        <i class="bi bi-cash-coin"></i> Salário Mensal
+                    </label>
+                    {{ form.salario }}
+                    {% if form.salario.errors %}
+                        <div class="alert-fb alert-danger-fb mt-2">
+                            {{ form.salario.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label for="{{ form.data_admissao.id_for_label }}" class="form-label-fb">
+                        <i class="bi bi-calendar-event"></i> Data de Admissão
+                    </label>
+                    {{ form.data_admissao }}
+                    {% if form.data_admissao.errors %}
+                        <div class="alert-fb alert-danger-fb mt-2">
+                            {{ form.data_admissao.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- DEPARTAMENTO -->
+            <div class="mb-4">
+                <label for="{{ form.departamento.id_for_label }}" class="form-label-fb">
+                    <i class="bi bi-building"></i> Departamento
+                </label>
+                {{ form.departamento }}
+                {% if form.departamento.errors %}
+                    <div class="alert-fb alert-danger-fb mt-2">
+                        {{ form.departamento.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- BUTTONS -->
+            <div class="d-flex gap-2" style="margin-top: 2rem;">
+                <button type="submit" class="btn btn-fb-primary" style="padding: 0.875rem 2rem;">
+                    <i class="bi bi-check-circle"></i> Salvar Funcionário
+                </button>
+                <a href="{% url 'core:funcionario_list' %}" class="btn btn-fb-secondary" style="padding: 0.875rem 2rem;">
+                    <i class="bi bi-x-circle"></i> Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Estilos customizados para inputs */
+    #id_nome, #id_cpf, #id_cargo, #id_salario, #id_data_admissao, #id_departamento {
+        border: 1px solid #ccc;
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+
+    #id_nome:focus, #id_cpf:focus, #id_cargo:focus, #id_salario:focus, #id_data_admissao:focus, #id_departamento:focus {
+        border-color: #1877f2;
+        box-shadow: 0 0 0 3px rgba(24, 119, 242, 0.1);
+        outline: none;
+    }
+
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .fieldWrapper {
+        margin-bottom: 1rem;
+    }
+</style>
+
+{% endblock %}

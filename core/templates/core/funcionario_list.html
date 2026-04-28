@@ -1,0 +1,99 @@
+{% extends "core/base.html" %}
+{% block title %}Funcionários - Sistema RH{% endblock %}
+{% block content %}
+
+<!-- PAGE TITLE -->
+<h1 class="page-title fade-in">
+    <i class="bi bi-people-fill"></i>Funcionários
+</h1>
+
+<!-- FILTROS E BUSCA -->
+<div class="card-fb fade-in mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label-fb">Buscar por Nome</label>
+                <input type="text" name="search" value="{{ search }}" class="form-control-fb w-100" placeholder="Digite o nome...">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label-fb">Departamento</label>
+                <select name="departamento" class="form-control-fb w-100">
+                    <option value="">📍 Todos os departamentos</option>
+                    {% for d in departamentos %}
+                    <option value="{{ d.id }}" {% if d.id|stringformat:"s" == departamento_atual %}selected{% endif %}>
+                        {{ d.sigla }} - {{ d.nome }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label-fb">&nbsp;</label>
+                <button class="btn btn-fb-primary w-100" type="submit">
+                    <i class="bi bi-funnel"></i> Filtrar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- LISTA DE FUNCIONÁRIOS -->
+<div class="card-fb">
+    {% if funcionarios %}
+        <div class="table-responsive">
+            <table class="table table-fb">
+                <thead>
+                    <tr>
+                        <th><i class="bi bi-person"></i> Nome</th>
+                        <th><i class="bi bi-credit-card"></i> CPF</th>
+                        <th><i class="bi bi-briefcase"></i> Cargo</th>
+                        <th><i class="bi bi-building"></i> Departamento</th>
+                        <th><i class="bi bi-cash"></i> Salário</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for f in funcionarios %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'core:funcionario_detail' f.pk %}" style="color: var(--text-blue); text-decoration: none; font-weight: 600;">
+                                {{ f.nome }}
+                            </a>
+                        </td>
+                        <td>
+                            <code style="background: var(--bg-table-header); padding: 0.25rem 0.5rem; border-radius: 0.25rem;">
+                                {{ f.cpf }}
+                            </code>
+                        </td>
+                        <td>{{ f.cargo }}</td>
+                        <td>
+                            <span class="badge badge-fb badge-primary-fb">
+                                {{ f.departamento.sigla }}
+                            </span>
+                        </td>
+                        <td class="salary-text">R$ {{ f.salario|floatformat:2 }}</td>
+                        <td>
+                            <a href="{% url 'core:funcionario_detail' f.pk %}" class="btn btn-sm btn-fb-secondary" title="Visualizar">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{% url 'core:funcionario_update' f.pk %}" class="btn btn-sm btn-fb-secondary" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'core:funcionario_delete' f.pk %}" class="btn btn-sm btn-fb-danger" title="Deletar">
+                                ❌
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="card-body">
+            <div class="alert-fb alert-info-fb">
+                <i class="bi bi-info-circle"></i> <strong>Nenhum funcionário encontrado.</strong>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RH - {{ employee }}</title>
+</head>
+<body style="font-family:Arial,sans-serif; margin:24px;">
+    <a href="/">← Voltar para lista</a>
+    <h1>{{ employee.first_name }} {{ employee.last_name }}</h1>
+    <dl>
+        <dt>Email:</dt><dd>{{ employee.email }}</dd>
+        <dt>Posição:</dt><dd>{{ employee.position.title }}</dd>
+        <dt>Departamento:</dt><dd>{{ employee.position.department.name }}</dd>
+        <dt>Salário:</dt><dd>R$ {{ employee.position.salary }}</dd>
+        <dt>Contratado em:</dt><dd>{{ employee.hired_date }}</dd>
+        <dt>Ativo:</dt><dd>{{ employee.is_active|yesno:"Sim,Não" }}</dd>
+    </dl>
+</body>
+</html>

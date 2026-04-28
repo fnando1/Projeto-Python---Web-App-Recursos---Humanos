@@ -1,0 +1,108 @@
+{% extends "core/base.html" %}
+{% block title %}Férias - Sistema RH{% endblock %}
+{% block content %}
+
+<!-- PAGE TITLE -->
+<h1 class="page-title">
+    <i class="bi bi-calendar-heart"></i>Gestão de Férias
+</h1>
+
+<!-- BUSCA -->
+<div class="card-fb mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-9">
+                <label class="form-label-fb">Buscar por Funcionário</label>
+                <input type="text" name="search" value="{{ search }}" class="form-control-fb w-100" placeholder="Digite o nome do funcionário...">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label-fb">&nbsp;</label>
+                <button class="btn btn-fb-primary w-100" type="submit">
+                    <i class="bi bi-search"></i> Buscar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- LISTA DE FÉRIAS -->
+<div class="card-fb">
+    {% if ferias %}
+        <div class="table-responsive">
+            <table class="table table-fb">
+                <thead>
+                    <tr>
+                        <th><i class="bi bi-person"></i> Funcionário</th>
+                        <th><i class="bi bi-calendar-check"></i> Data Início</th>
+                        <th><i class="bi bi-calendar-x"></i> Data Fim</th>
+                        <th><i class="bi bi-calendar2-day"></i> Duração</th>
+                        <th><i class="bi bi-info-circle"></i> Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ferias in ferias %}
+                    {% with dias=ferias.data_fim|add:ferias.data_inicio %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'core:ferias_detail' ferias.pk %}" style="color: var(--text-blue); text-decoration: none; font-weight: 600;">
+                                {{ ferias.funcionario.nome }}
+                            </a>
+                            <small style="display: block;">
+                                {{ ferias.funcionario.departamento.sigla }}
+                            </small>
+                        </td>
+                        <td>
+                            <strong>{{ ferias.data_inicio|date:"d/m/Y" }}</strong>
+                        </td>
+                        <td>
+                            {{ ferias.data_fim|date:"d/m/Y" }}
+                        </td>
+                        <td>
+                            <span class="badge badge-fb badge-info-fb">
+                                {{ dias|add:1 }} dias
+                            </span>
+                        </td>
+                        <td>
+                            {% now "Y-m-d" as today %}
+                            {% if ferias.data_inicio <= today|date:"Y-m-d" and ferias.data_fim >= today|date:"Y-m-d" %}
+                                <span class="badge badge-fb badge-danger-fb">
+                                    🏖️ Em Férias
+                                </span>
+                            {% elif ferias.data_inicio > today|date:"Y-m-d" %}
+                                <span class="badge badge-fb badge-warning-fb">
+                                    ⏳ Planejada
+                                </span>
+                            {% else %}
+                                <span class="badge badge-fb badge-success-fb">
+                                    ✓ Finalizada
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'core:ferias_detail' ferias.pk %}" class="btn btn-sm btn-fb-secondary" title="Visualizar">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{% url 'core:ferias_update' ferias.pk %}" class="btn btn-sm btn-fb-secondary" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'core:ferias_delete' ferias.pk %}" class="btn btn-sm btn-fb-danger" title="Deletar">
+                                ❌
+                            </a>
+                        </td>
+                    </tr>
+                    {% endwith %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="card-body">
+            <div class="alert-fb alert-info-fb">
+                <i class="bi bi-info-circle"></i> <strong>Nenhum período de férias registrado.</strong>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

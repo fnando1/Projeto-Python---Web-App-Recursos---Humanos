@@ -1,0 +1,5 @@
+Django>=6.0,<7.0
+psycopg2-binary
+django-crispy-forms
+crispy-bootstrap5
+mysqlclient

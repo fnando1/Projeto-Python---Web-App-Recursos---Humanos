@@ -1,0 +1,97 @@
+{% extends "core/base.html" %}
+{% block title %}{{ titulo }} - Sistema RH{% endblock %}
+{% block content %}
+
+<!-- PAGE HEADER -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="page-title mb-0">
+        <i class="bi bi-calendar-plus"></i>{{ titulo }}
+    </h1>
+    <a class="btn btn-fb-secondary" href="{% url 'core:ferias_list' %}">
+        <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+</div>
+
+<!-- FORM CARD -->
+<div class="card-fb" style="max-width: 600px;">
+    <div class="card-header" style="background: var(--bg-active); border: none;">
+        <h5 class="mb-0" style="color: white; font-weight: 700;">
+            <i class="bi bi-pencil-square"></i> Registre as férias do funcionário
+        </h5>
+    </div>
+    <div class="card-body" style="padding: 2rem;">
+        {% if form.non_field_errors %}
+            <div class="alert-fb alert-danger-fb mb-3">
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            <!-- FUNCIONÁRIO -->
+            <div class="mb-3">
+                <label for="id_funcionario" class="form-label-fb">
+                    <i class="bi bi-person"></i> Funcionário
+                </label>
+                {{ form.funcionario }}
+                {% if form.funcionario.errors %}
+                    <div class="alert-fb alert-danger-fb mt-2">{{ form.funcionario.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- DATAS -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="id_data_inicio" class="form-label-fb">
+                        <i class="bi bi-calendar-check"></i> Data de Início
+                    </label>
+                    {{ form.data_inicio }}
+                    {% if form.data_inicio.errors %}
+                        <div class="alert-fb alert-danger-fb mt-2">{{ form.data_inicio.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label for="id_data_fim" class="form-label-fb">
+                        <i class="bi bi-calendar-x"></i> Data de Término
+                    </label>
+                    {{ form.data_fim }}
+                    {% if form.data_fim.errors %}
+                        <div class="alert-fb alert-danger-fb mt-2">{{ form.data_fim.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- BUTTONS -->
+            <div class="d-flex gap-2" style="margin-top: 2rem;">
+                <button type="submit" class="btn btn-fb-primary" style="padding: 0.875rem 2rem;">
+                    <i class="bi bi-check-circle"></i> Registrar Férias
+                </button>
+                <a href="{% url 'core:ferias_list' %}" class="btn btn-fb-secondary" style="padding: 0.875rem 2rem;">
+                    <i class="bi bi-x-circle"></i> Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    #id_funcionario, #id_data_inicio, #id_data_fim {
+        border: 1px solid #ccc;
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+
+    #id_funcionario:focus, #id_data_inicio:focus, #id_data_fim:focus {
+        border-color: #1877f2;
+        box-shadow: 0 0 0 3px rgba(24, 119, 242, 0.1);
+        outline: none;
+    }
+</style>
+
+{% endblock %}

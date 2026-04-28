@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>MER -- Sistema de RH</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap');
+ :root {
+  --bg: #0b0f1a;
+  --panel: #111827;
+  --border: #1e2a3a;
+  --accent: #00e5ff;
+  --accent2: #ff6b6b;
+  --accent3: #a78bfa;
+  --accent4: #34d399;
+  --text: #e2e8f0;
+  --muted: #64748b;
+  --card: #0d1520;
+ }
+ * { box-sizing: border-box; margin: 0; padding: 0; }
+ body { background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; min-height: 100vh; overflow-x: hidden; }
+ /* Background grid */
+ body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
+ header { position: relative; z-index: 2; padding: 40px 48px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 20px; }
+ .logo-box { width: 52px; height: 52px; background: linear-gradient(135deg, var(--accent), var(--accent3)); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 800; color: #000; font-family: 'Space Mono', monospace; flex-shrink: 0; }
+ h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
+ h1 span { color: var(--accent); }
+ .subtitle { font-size: 13px; color: var(--muted); margin-top: 3px; font-family: 'Space Mono', monospace; }
+ .legend { margin-left: auto; display: flex; gap: 16px; flex-wrap: wrap; }
+ .leg-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); font-family: 'Space Mono', monospace; }
+ .leg-dot { width: 10px; height: 10px; border-radius: 2px; }
+ /* Tabs */
+ .tabs { position: relative; z-index: 2; display: flex; gap: 0; padding: 0 48px; border-bottom: 1px solid var(--border); }
+ .tab { padding: 14px 22px; font-size: 13px; font-weight: 700; font-family: 'Space Mono', monospace; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; transition: all 0.2s; user-select: none; }
+ .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab:hover:not(.active) { color: var(--text); }
+ /* Main */
+ main { position: relative; z-index: 1; padding: 40px 48px 80px; }
+ .view { display: none; }
+.view.active { display: block; }
+ /* ===== ER DIAGRAM ===== */
+ .er-canvas { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; position: relative; }
+ .er-table { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; break-inside: avoid; }
+ .er-table:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.5); }
+ .er-table.highlight-blue  { border-color: var(--accent);  box-shadow: 0 0 0 1px var(--accent); }
+.er-table.highlight-red   { border-color: var(--accent2); box-shadow: 0 0 0 1px var(--accent2); }
+.er-table.highlight-purple{ border-color: var(--accent3); box-shadow: 0 0 0 1px var(--accent3); }
+.er-table.highlight-green { border-color: var(--accent4); box-shadow: 0 0 0 1px var(--accent4); }
+ .er-header { padding: 12px 16px; font-size: 12px; font-weight: 800; font-family: 'Space Mono', monospace; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; }
+ .er-header.blue   { background: rgba(0,229,255,0.12); color: var(--accent); }
+.er-header.red    { background: rgba(255,107,107,0.12); color: var(--accent2); }
+.er-header.purple { background: rgba(167,139,250,0.12); color: var(--accent3); }
+.er-header.green  { background: rgba(52,211,153,0.12); color: var(--accent4); }
+.er-header.gray   { background: rgba(100,116,139,0.12); color: var(--muted); }
+ .er-icon { font-size: 14px; }
+ .er-fields { padding: 0; }
+ .er-field { display: flex; align-items: center; gap: 10px; padding: 7px 16px; border-top: 1px solid rgba(255,255,255,0.04); font-size: 12px; font-family: 'Space Mono', monospace; }
+ .er-field:hover { background: rgba(255,255,255,0.02); }
+ .field-key { font-size: 9px; font-weight: 700; padding: 2px 5px; border-radius: 3px; text-transform: uppercase; flex-shrink: 0; }
+ .pk { background: rgba(0,229,255,0.2); color: var(--accent); }
+.fk { background: rgba(167,139,250,0.2); color: var(--accent3); }
+.uk { background: rgba(52,211,153,0.2); color: var(--accent4); }
+ .field-name { color: var(--text); flex: 1; }
+.field-type { color: var(--muted); font-size: 10px; }
+.field-nn { color: var(--accent2); font-size: 9px; font-weight: 700; }
+ /* Relationships section */
+ .rel-section { margin-top: 40px; }
+ .rel-section h2 { font-size: 14px; font-weight: 800; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-bottom: 20px; font-family: 'Space Mono', monospace; }
+ .rel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+ .rel-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; }
+ .rel-from, .rel-to { font-size: 11px; font-family: 'Space Mono', monospace; font-weight: 700; color: var(--text); min-width: 0; }
+ .rel-arrow { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; flex-shrink: 0; }
+ .rel-type { font-size: 10px; font-family: 'Space Mono', monospace; color: var(--accent); font-weight: 700; }
+ .rel-line { width: 100%; height: 1px; background: linear-gradient(90deg, var(--accent3), var(--accent)); position: relative; }
+ .rel-desc { font-size: 10px; color: var(--muted); margin-top: 4px; font-family: 'Space Mono', monospace; }
+ /* ===== SQL VIEW ===== */
+ .sql-wrap { background: #080d14; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+ .sql-toolbar { padding: 12px 20px; background: var(--panel); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+ .sql-dot { width: 10px; height: 10px; border-radius: 50%; }
+ .sql-filename { margin-left: 12px; font-size: 12px; font-family: 'Space Mono', monospace; color: var(--muted); }
+ .copy-btn { margin-left: auto; background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.3); color: var(--accent); padding: 6px 14px; border-radius: 6px; font-size: 11px; font-family: 'Space Mono', monospace; cursor: pointer; transition: all 0.2s; }
+ .copy-btn:hover { background: rgba(0,229,255,0.2); }
+ pre { padding: 28px 32px; overflow-x: auto; font-family: 'Space Mono', monospace; font-size: 12px; line-height: 1.9; color: #94a3b8; tab-size: 2; }
+ .kw  { color: #60a5fa; font-weight: 700; }
+.tb  { color: var(--accent); }
+.col { color: #e2e8f0; }
+.tp  { color: var(--accent3); }
+.cm  { color: #475569; font-style: italic; }
+.str { color: var(--accent4); }
+.num { color: var(--accent2); }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo-box">HR</div>
+  <div>
+    <h1>MER — Sistema de <span>Recursos Humanos</span></h1>
+    <div class="subtitle">// Modelo de Entidade e Relacionamento · MySQL</div>
+  </div>
+  <div class="legend">
+    <div class="leg-item"><div class="leg-dot" style="background:var(--accent)"></div>PK — Chave Primária</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--accent3)"></div>FK — Chave Estrangeira</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--accent4)"></div>UK — Chave Única</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--accent2)"></div>NN — Not Null</div>
+  </div>
+</header>
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('diagram')">📊 Diagrama ER</div>
+  <div class="tab" onclick="switchTab('sql')">🗄️ Script SQL</div>
+</div>
+<main>
+<!-- ===== DIAGRAM VIEW ===== -->
+<div class="view active" id="view-diagram">
+  <div class="er-canvas">
+<!-- PESSOA -->
+<div class="er-table highlight-blue">
+  <div class="er-header blue"><span class="er-icon">👤</span> PESSOA</div>
+  <div class="er-fields">
+    <div class="er-field"><span class="field-key pk">PK</span><span class="field-name">id_pessoa</span><span class="field-type">INT</span></div>
+    <div class="er-field"><span class="field-key uk">UK</span><span class="field-name">cpf</span><span class="field-type">VARCHAR(14)</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key uk">UK</span><span class="field-name">email</span><span class="field-type">VARCHAR(120)</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">nome_completo</span><span class="field-type">VARCHAR(150)</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">telefone</span><span class="field-type">VARCHAR(20)</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">data_nascimento</span><span class="field-type">DATE</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">genero</span><span class="field-type">ENUM</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">endereco</span><span class="field-type">TEXT</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">foto_perfil</span><span class="field-type">VARCHAR(255)</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">criado_em</span><span class="field-type">TIMESTAMP</span></div>
+  </div>
+</div>
+<!-- USUARIO (LOGIN) -->
+<div class="er-table highlight-blue">
+  <div class="er-header blue"><span class="er-icon">🔐</span> USUARIO</div>
+  <div class="er-fields">
+    <div class="er-field"><span class="field-key pk">PK</span><span class="field-name">id_usuario</span><span class="field-type">INT</span></div>
+    <div class="er-field"><span class="field-key fk">FK</span><span class="field-name">id_pessoa</span><span class="field-type">INT</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key uk">UK</span><span class="field-name">login</span><span class="field-type">VARCHAR(80)</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">senha_hash</span><span class="field-type">VARCHAR(255)</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key fk">FK</span><span class="field-name">id_perfil</span><span class="field-type">INT</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">ativo</span><span class="field-type">TINYINT(1)</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">ultimo_acesso</span><span class="field-type">TIMESTAMP</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">token_reset</span><span class="field-type">VARCHAR(255)</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">criado_em</span><span class="field-type">TIMESTAMP</span></div>
+  </div>
+</div>
+<!-- PERFIL_ACESSO -->
+<div class="er-table highlight-purple">
+  <div class="er-header purple"><span class="er-icon">🛡️</span> PERFIL_ACESSO</div>
+  <div class="er-fields">
+    <div class="er-field"><span class="field-key pk">PK</span><span class="field-name">id_perfil</span><span class="field-type">INT</span></div>
+    <div class="er-field"><span class="field-key uk">UK</span><span class="field-name">nome</span><span class="field-type">ENUM</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">descricao</span><span class="field-type">TEXT</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">nivel_acesso</span><span class="field-type">TINYINT</span><span class="field-nn">NN</span></div>
+  </div>
+  <div style="padding:10px 16px; border-top:1px solid rgba(255,255,255,0.06);">
+    <div style="font-size:10px; color:var(--accent3); font-family:'Space Mono',monospace; font-weight:700; margin-bottom:6px;">ENUM VALORES:</div>
+    <div style="font-size:10px; color:var(--muted); font-family:'Space Mono',monospace; line-height:1.8">
+      'DIRETOR' → nível 1<br>
+      'GERENTE_RH' → nível 2<br>
+      'AUXILIAR_RH' → nível 3<br>
+      'CANDIDATO' → nível 4
+    </div>
+  </div>
+</div>
+<!-- DEPARTAMENTO -->
+<div class="er-table highlight-green">
+  <div class="er-header green"><span class="er-icon">🏢</span> DEPARTAMENTO</div>
+  <div class="er-fields">
+    <div class="er-field"><span class="field-key pk">PK</span><span class="field-name">id_departamento</span><span class="field-type">INT</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">nome</span><span class="field-type">VARCHAR(100)</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">sigla</span><span class="field-type">VARCHAR(10)</span></div>
+    <div class="er-field"><span class="field-key fk">FK</span><span class="field-name">id_gerente</span><span class="field-type">INT</span></div>
+    <div class="er-field"><span class="field-key fk">FK</span><span class="field-name">id_dept_pai</span><span class="field-type">INT</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">ativo</span><span class="field-type">TINYINT(1)</span></div>
+  </div>
+</div>
+<!-- CARGO -->
+<div class="er-table highlight-green">
+  <div class="er-header green"><span class="er-icon">💼</span> CARGO</div>
+  <div class="er-fields">
+    <div class="er-field"><span class="field-key pk">PK</span><span class="field-name">id_cargo</span><span class="field-type">INT</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">titulo</span><span class="field-type">VARCHAR(100)</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key fk">FK</span><span class="field-name">id_departamento</span><span class="field-type">INT</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">descricao</span><span class="field-type">TEXT</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">salario_base</span><span class="field-type">DECIMAL(10,2)</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">nivel_hierarquico</span><span class="field-type">VARCHAR(30)</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">cbo</span><span class="field-type">VARCHAR(10)</span></div>
+  </div>
+</div>
+<!-- FUNCIONARIO -->
+<div class="er-table highlight-blue">
+  <div class="er-header blue"><span class="er-icon">👷</span> FUNCIONARIO</div>
+  <div class="er-fields">
+    <div class="er-field"><span class="field-key pk">PK</span><span class="field-name">id_funcionario</span><span class="field-type">INT</span></div>
+    <div class="er-field"><span class="field-key fk">FK</span><span class="field-name">id_pessoa</span><span class="field-type">INT</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key uk">UK</span><span class="field-name">matricula</span><span class="field-type">VARCHAR(20)</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key fk">FK</span><span class="field-name">id_cargo</span><span class="field-type">INT</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key fk">FK</span><span class="field-name">id_departamento</span><span class="field-type">INT</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">data_admissao</span><span class="field-type">DATE</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">data_demissao</span><span class="field-type">DATE</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">salario_atual</span><span class="field-type">DECIMAL(10,2)</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">tipo_contrato</span><span class="field-type">ENUM</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key fk">FK</span><span class="field-name">id_superior</span><span class="field-type">INT</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">status</span><span class="field-type">ENUM</span><span class="field-nn">NN</span></div>
+  </div>
+</div>
+<!-- VAGA -->
+<div class="er-table highlight-red">
+  <div class="er-header red"><span class="er-icon">📋</span> VAGA</div>
+  <div class="er-fields">
+    <div class="er-field"><span class="field-key pk">PK</span><span class="field-name">id_vaga</span><span class="field-type">INT</span></div>
+    <div class="er-field"><span class="field-key fk">FK</span><span class="field-name">id_cargo</span><span class="field-type">INT</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key fk">FK</span><span class="field-name">id_departamento</span><span class="field-type">INT</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key fk">FK</span><span class="field-name">id_criador</span><span class="field-type">INT</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">titulo</span><span class="field-type">VARCHAR(150)</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">descricao</span><span class="field-type">TEXT</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">requisitos</span><span class="field-type">TEXT</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">qtd_vagas</span><span class="field-type">INT</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">tipo</span><span class="field-type">ENUM</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">salario_ofertado</span><span class="field-type">DECIMAL(10,2)</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">data_abertura</span><span class="field-type">DATE</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">data_encerramento</span><span class="field-type">DATE</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">status</span><span class="field-type">ENUM</span><span class="field-nn">NN</span></div>
+  </div>
+</div>
+<!-- CANDIDATURA -->
+<div class="er-table highlight-red">
+  <div class="er-header red"><span class="er-icon">📩</span> CANDIDATURA</div>
+  <div class="er-fields">
+    <div class="er-field"><span class="field-key pk">PK</span><span class="field-name">id_candidatura</span><span class="field-type">INT</span></div>
+    <div class="er-field"><span class="field-key fk">FK</span><span class="field-name">id_usuario</span><span class="field-type">INT</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key fk">FK</span><span class="field-name">id_vaga</span><span class="field-type">INT</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">data_candidatura</span><span class="field-type">TIMESTAMP</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">status</span><span class="field-type">ENUM</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">curriculo_url</span><span class="field-type">VARCHAR(255)</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">carta_motivacao</span><span class="field-type">TEXT</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">nota_triagem</span><span class="field-type">DECIMAL(4,2)</span></div>
+    <div class="er-field"><span class="field-key fk">FK</span><span class="field-name">id_avaliador</span><span class="field-type">INT</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">obs_avaliador</span><span class="field-type">TEXT</span></div>
+  </div>
+</div>
+<!-- HISTORICO_SALARIAL -->
+<div class="er-table highlight-green">
+  <div class="er-header green"><span class="er-icon">💰</span> HISTORICO_SALARIAL</div>
+  <div class="er-fields">
+    <div class="er-field"><span class="field-key pk">PK</span><span class="field-name">id_historico</span><span class="field-type">INT</span></div>
+    <div class="er-field"><span class="field-key fk">FK</span><span class="field-name">id_funcionario</span><span class="field-type">INT</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">salario_anterior</span><span class="field-type">DECIMAL(10,2)</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">salario_novo</span><span class="field-type">DECIMAL(10,2)</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">motivo</span><span class="field-type">VARCHAR(150)</span></div>
+    <div class="er-field"><span class="field-key fk">FK</span><span class="field-name">id_aprovador</span><span class="field-type">INT</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">data_alteracao</span><span class="field-type">DATE</span><span class="field-nn">NN</span></div>
+  </div>
+</div>
+<!-- AVALIACAO_DESEMPENHO -->
+<div class="er-table highlight-purple">
+  <div class="er-header purple"><span class="er-icon">⭐</span> AVALIACAO_DESEMPENHO</div>
+  <div class="er-fields">
+    <div class="er-field"><span class="field-key pk">PK</span><span class="field-name">id_avaliacao</span><span class="field-type">INT</span></div>
+    <div class="er-field"><span class="field-key fk">FK</span><span class="field-name">id_funcionario</span><span class="field-type">INT</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key fk">FK</span><span class="field-name">id_avaliador</span><span class="field-type">INT</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">periodo_inicio</span><span class="field-type">DATE</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">periodo_fim</span><span class="field-type">DATE</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">nota_tecnica</span><span class="field-type">DECIMAL(4,2)</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">nota_comportamental</span><span class="field-type">DECIMAL(4,2)</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">nota_geral</span><span class="field-type">DECIMAL(4,2)</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">comentarios</span><span class="field-type">TEXT</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">criado_em</span><span class="field-type">TIMESTAMP</span></div>
+  </div>
+</div>
+<!-- TREINAMENTO -->
+<div class="er-table highlight-purple">
+  <div class="er-header purple"><span class="er-icon">🎓</span> TREINAMENTO</div>
+  <div class="er-fields">
+    <div class="er-field"><span class="field-key pk">PK</span><span class="field-name">id_treinamento</span><span class="field-type">INT</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">nome</span><span class="field-type">VARCHAR(150)</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">descricao</span><span class="field-type">TEXT</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">modalidade</span><span class="field-type">ENUM</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">carga_horaria</span><span class="field-type">INT</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">data_inicio</span><span class="field-type">DATE</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">data_fim</span><span class="field-type">DATE</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">custo</span><span class="field-type">DECIMAL(10,2)</span></div>
+  </div>
+</div>
+<!-- FUNC_TREINAMENTO (Pivot) -->
+<div class="er-table highlight-purple">
+  <div class="er-header gray"><span class="er-icon">🔗</span> FUNCIONARIO_TREINAMENTO</div>
+  <div class="er-fields">
+    <div class="er-field"><span class="field-key pk">PK</span><span class="field-name">id</span><span class="field-type">INT</span></div>
+    <div class="er-field"><span class="field-key fk">FK</span><span class="field-name">id_funcionario</span><span class="field-type">INT</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key fk">FK</span><span class="field-name">id_treinamento</span><span class="field-type">INT</span><span class="field-nn">NN</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">status</span><span class="field-type">ENUM</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">nota_conclusao</span><span class="field-type">DECIMAL(4,2)</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">data_conclusao</span><span class="field-type">DATE</span></div>
+    <div class="er-field"><span class="field-key" style="width:10px"></span><span class="field-name">certificado_url</span><span class="field-type">VARCHAR(255)</span></div>
+  </div>
+</div>
+  </div>
+  <!-- RELACIONAMENTOS -->
+  <div class="rel-section">
+    <h2>// Relacionamentos</h2>
+    <div class="rel-grid">
+   <div class="rel-card">
+    <div class="rel-from">PESSOA</div>
+    <div class="rel-arrow">
+      <div class="rel-type">1 : 1</div>
+      <div class="rel-line"></div>
+      <div class="rel-desc">possui login</div>
+    </div>
+    <div class="rel-to">USUARIO</div>
+  </div>
+   <div class="rel-card">
+    <div class="rel-from">USUARIO</div>
+    <div class="rel-arrow">
+      <div class="rel-type">N : 1</div>
+      <div class="rel-line"></div>
+      <div class="rel-desc">pertence ao perfil</div>
+    </div>
+    <div class="rel-to">PERFIL_ACESSO</div>
+  </div>
+   <div class="rel-card">
+    <div class="rel-from">PESSOA</div>
+    <div class="rel-arrow">
+      <div class="rel-type">1 : 1</div>
+      <div class="rel-line"></div>
+      <div class="rel-desc">é funcionário</div>
+    </div>
+    <div class="rel-to">FUNCIONARIO</div>
+  </div>
+   <div class="rel-card">
+    <div class="rel-from">FUNCIONARIO</div>
+    <div class="rel-arrow">
+      <div class="rel-type">N : 1</div>
+      <div class="rel-line"></div>
+      <div class="rel-desc">ocupa cargo</div>
+    </div>
+    <div class="rel-to">CARGO</div>
+  </div>
+   <div class="rel-card">
+    <div class="rel-from">FUNCIONARIO</div>
+    <div class="rel-arrow">
+      <div class="rel-type">N : 1</div>
+      <div class="rel-line"></div>
+      <div class="rel-desc">pertence a depto</div>
+    </div>
+    <div class="rel-to">DEPARTAMENTO</div>
+  </div>
+   <div class="rel-card">
+    <div class="rel-from">CARGO</div>
+    <div class="rel-arrow">
+      <div class="rel-type">N : 1</div>
+      <div class="rel-line"></div>
+      <div class="rel-desc">vinculado ao depto</div>
+    </div>
+    <div class="rel-to">DEPARTAMENTO</div>
+  </div>
+   <div class="rel-card">
+    <div class="rel-from">VAGA</div>
+    <div class="rel-arrow">
+      <div class="rel-type">N : 1</div>
+      <div class="rel-line"></div>
+      <div class="rel-desc">refere-se ao cargo</div>
+    </div>
+    <div class="rel-to">CARGO</div>
+  </div>
+   <div class="rel-card">
+    <div class="rel-from">USUARIO</div>
+    <div class="rel-arrow">
+      <div class="rel-type">1 : N</div>
+      <div class="rel-line"></div>
+      <div class="rel-desc">se candidata a</div>
+    </div>
+    <div class="rel-to">CANDIDATURA</div>
+  </div>
+   <div class="rel-card">
+    <div class="rel-from">CANDIDATURA</div>
+    <div class="rel-arrow">
+      <div class="rel-type">N : 1</div>
+      <div class="rel-line"></div>
+      <div class="rel-desc">é para a vaga</div>
+    </div>
+    <div class="rel-to">VAGA</div>
+  </div>
+   <div class="rel-card">
+    <div class="rel-from">FUNCIONARIO</div>
+    <div class="rel-arrow">
+      <div class="rel-type">1 : N</div>
+      <div class="rel-line"></div>
+      <div class="rel-desc">tem histórico</div>
+    </div>
+    <div class="rel-to">HIST. SALARIAL</div>
+  </div>
+   <div class="rel-card">
+    <div class="rel-from">FUNCIONARIO</div>
+    <div class="rel-arrow">
+      <div class="rel-type">N : M</div>
+      <div class="rel-line"></div>
+      <div class="rel-desc">participa de</div>
+    </div>
+    <div class="rel-to">TREINAMENTO</div>
+  </div>
+   <div class="rel-card">
+    <div class="rel-from">FUNCIONARIO</div>
+    <div class="rel-arrow">
+      <div class="rel-type">1 : N</div>
+      <div class="rel-line"></div>
+      <div class="rel-desc">recebe avaliações</div>
+    </div>
+    <div class="rel-to">AVALIACAO</div>
+  </div>
+  </div>
+  </div>
+</div>
+<!-- ===== SQL VIEW ===== -->
+<div class="view" id="view-sql">
+  <div class="sql-wrap">
+    <div class="sql-toolbar">
+      <div class="sql-dot" style="background:#ff5f57"></div>
+      <div class="sql-dot" style="background:#febc2e"></div>
+      <div class="sql-dot" style="background:#28c840"></div>
+      <span class="sql-filename">sistema_rh.sql</span>
+      <button class="copy-btn" onclick="copySql()">⎘ Copiar SQL</button>
+    </div>
+    <pre id="sql-content"><span class="cm">-- ============================================================ --  SISTEMA DE RH — Script DDL MySQL --  Gerado em: 2025 -- ============================================================</span>
+
+<span class="kw">CREATE DATABASE IF NOT EXISTS</span> <span class="tb">sistema_rh</span> <span class="kw">DEFAULT CHARACTER SET</span> utf8mb4 <span class="kw">DEFAULT COLLATE</span> utf8mb4_unicode_ci;
+
+<span class="kw">USE</span> <span class="tb">sistema_rh</span>;
+
+<span class="cm">-- ============================================================ --  1. PERFIL_ACESSO  (os 4 tipos de login) -- ============================================================</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">perfil_acesso</span> (
+<span class="col">id_perfil</span>       <span class="tp">INT</span>          <span class="kw">NOT NULL AUTO_INCREMENT</span>,
+<span class="col">nome</span>            <span class="tp">ENUM</span>(<span class="str">‘DIRETOR’</span>,<span class="str">‘GERENTE_RH’</span>,<span class="str">‘AUXILIAR_RH’</span>,<span class="str">‘CANDIDATO’</span>) <span class="kw">NOT NULL UNIQUE</span>,
+<span class="col">descricao</span>       <span class="tp">TEXT</span>,
+<span class="col">nivel_acesso</span>    <span class="tp">TINYINT</span>      <span class="kw">NOT NULL</span>  <span class="cm">-- 1=mais alto</span>,
+<span class="kw">PRIMARY KEY</span> (<span class="col">id_perfil</span>)
+) <span class="kw">ENGINE</span>=InnoDB;
+
+<span class="cm">-- Dados iniciais dos perfis</span>
+<span class="kw">INSERT INTO</span> <span class="tb">perfil_acesso</span> (<span class="col">nome</span>, <span class="col">descricao</span>, <span class="col">nivel_acesso</span>) <span class="kw">VALUES</span>
+(<span class="str">‘DIRETOR’</span>,      <span class="str">‘Acesso total ao sistema’</span>,           <span class="num">1</span>),
+(<span class="str">‘GERENTE_RH’</span>,   <span class="str">‘Gerencia processos de RH’</span>,           <span class="num">2</span>),
+(<span class="str">‘AUXILIAR_RH’</span>,  <span class="str">‘Operações básicas de RH’</span>,            <span class="num">3</span>),
+(<span class="str">‘CANDIDATO’</span>,    <span class="str">‘Acesso ao formulário e candidatura’</span>, <span class="num">4</span>);
+
+<span class="cm">-- ============================================================ --  2. PESSOA  (formulário de cadastro público) -- ============================================================</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">pessoa</span> (
+<span class="col">id_pessoa</span>       <span class="tp">INT</span>              <span class="kw">NOT NULL AUTO_INCREMENT</span>,
+<span class="col">nome_completo</span>   <span class="tp">VARCHAR</span>(<span class="num">150</span>)     <span class="kw">NOT NULL</span>,
+<span class="col">cpf</span>             <span class="tp">VARCHAR</span>(<span class="num">14</span>)      <span class="kw">NOT NULL UNIQUE</span>,
+<span class="col">email</span>           <span class="tp">VARCHAR</span>(<span class="num">120</span>)     <span class="kw">NOT NULL UNIQUE</span>,
+<span class="col">telefone</span>        <span class="tp">VARCHAR</span>(<span class="num">20</span>),
+<span class="col">data_nascimento</span> <span class="tp">DATE</span>             <span class="kw">NOT NULL</span>,
+<span class="col">genero</span>          <span class="tp">ENUM</span>(<span class="str">‘M’</span>,<span class="str">‘F’</span>,<span class="str">‘NB’</span>,<span class="str">‘NAO_INFORMADO’</span>) <span class="kw">DEFAULT</span> <span class="str">‘NAO_INFORMADO’</span>,
+<span class="col">endereco</span>        <span class="tp">TEXT</span>,
+<span class="col">foto_perfil</span>     <span class="tp">VARCHAR</span>(<span class="num">255</span>),
+<span class="col">criado_em</span>       <span class="tp">TIMESTAMP</span>        <span class="kw">DEFAULT</span> CURRENT_TIMESTAMP,
+<span class="kw">PRIMARY KEY</span> (<span class="col">id_pessoa</span>)
+) <span class="kw">ENGINE</span>=InnoDB;
+
+<span class="cm">-- ============================================================ --  3. USUARIO  (controle de login) -- ============================================================</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">usuario</span> (
+<span class="col">id_usuario</span>      <span class="tp">INT</span>          <span class="kw">NOT NULL AUTO_INCREMENT</span>,
+<span class="col">id_pessoa</span>       <span class="tp">INT</span>          <span class="kw">NOT NULL UNIQUE</span>,
+<span class="col">login</span>           <span class="tp">VARCHAR</span>(<span class="num">80</span>)  <span class="kw">NOT NULL UNIQUE</span>,
+<span class="col">senha_hash</span>      <span class="tp">VARCHAR</span>(<span class="num">255</span>) <span class="kw">NOT NULL</span>,
+<span class="col">id_perfil</span>       <span class="tp">INT</span>          <span class="kw">NOT NULL</span>,
+<span class="col">ativo</span>           <span class="tp">TINYINT</span>(<span class="num">1</span>)   <span class="kw">NOT NULL DEFAULT</span> <span class="num">1</span>,
+<span class="col">ultimo_acesso</span>   <span class="tp">TIMESTAMP</span>    <span class="kw">NULL</span>,
+<span class="col">token_reset</span>     <span class="tp">VARCHAR</span>(<span class="num">255</span>),
+<span class="col">criado_em</span>       <span class="tp">TIMESTAMP</span>    <span class="kw">DEFAULT</span> CURRENT_TIMESTAMP,
+<span class="kw">PRIMARY KEY</span> (<span class="col">id_usuario</span>),
+<span class="kw">CONSTRAINT fk_usuario_pessoa</span>  <span class="kw">FOREIGN KEY</span> (<span class="col">id_pessoa</span>)  <span class="kw">REFERENCES</span> <span class="tb">pessoa</span>(<span class="col">id_pessoa</span>),
+<span class="kw">CONSTRAINT fk_usuario_perfil</span>  <span class="kw">FOREIGN KEY</span> (<span class="col">id_perfil</span>)  <span class="kw">REFERENCES</span> <span class="tb">perfil_acesso</span>(<span class="col">id_perfil</span>)
+) <span class="kw">ENGINE</span>=InnoDB;
+
+<span class="cm">-- ============================================================ --  4. DEPARTAMENTO -- ============================================================</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">departamento</span> (
+<span class="col">id_departamento</span> <span class="tp">INT</span>         <span class="kw">NOT NULL AUTO_INCREMENT</span>,
+<span class="col">nome</span>            <span class="tp">VARCHAR</span>(<span class="num">100</span>) <span class="kw">NOT NULL</span>,
+<span class="col">sigla</span>           <span class="tp">VARCHAR</span>(<span class="num">10</span>),
+<span class="col">id_gerente</span>      <span class="tp">INT</span>         <span class="kw">NULL</span>,   <span class="cm">-- FK para funcionario (definida após)</span>
+<span class="col">id_dept_pai</span>     <span class="tp">INT</span>         <span class="kw">NULL</span>,   <span class="cm">-- hierarquia de departamentos</span>
+<span class="col">ativo</span>           <span class="tp">TINYINT</span>(<span class="num">1</span>) <span class="kw">NOT NULL DEFAULT</span> <span class="num">1</span>,
+<span class="kw">PRIMARY KEY</span> (<span class="col">id_departamento</span>),
+<span class="kw">CONSTRAINT fk_dept_pai</span>  <span class="kw">FOREIGN KEY</span> (<span class="col">id_dept_pai</span>) <span class="kw">REFERENCES</span> <span class="tb">departamento</span>(<span class="col">id_departamento</span>)
+) <span class="kw">ENGINE</span>=InnoDB;
+
+<span class="cm">-- ============================================================ --  5. CARGO -- ============================================================</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">cargo</span> (
+<span class="col">id_cargo</span>         <span class="tp">INT</span>            <span class="kw">NOT NULL AUTO_INCREMENT</span>,
+<span class="col">titulo</span>           <span class="tp">VARCHAR</span>(<span class="num">100</span>)   <span class="kw">NOT NULL</span>,
+<span class="col">id_departamento</span>  <span class="tp">INT</span>            <span class="kw">NOT NULL</span>,
+<span class="col">descricao</span>        <span class="tp">TEXT</span>,
+<span class="col">salario_base</span>     <span class="tp">DECIMAL</span>(<span class="num">10</span>,<span class="num">2</span>),
+<span class="col">nivel_hierarquico</span> <span class="tp">VARCHAR</span>(<span class="num">30</span>),
+<span class="col">cbo</span>              <span class="tp">VARCHAR</span>(<span class="num">10</span>),
+<span class="kw">PRIMARY KEY</span> (<span class="col">id_cargo</span>),
+<span class="kw">CONSTRAINT fk_cargo_depto</span> <span class="kw">FOREIGN KEY</span> (<span class="col">id_departamento</span>) <span class="kw">REFERENCES</span> <span class="tb">departamento</span>(<span class="col">id_departamento</span>)
+) <span class="kw">ENGINE</span>=InnoDB;
+
+<span class="cm">-- ============================================================ --  6. FUNCIONARIO -- ============================================================</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">funcionario</span> (
+<span class="col">id_funcionario</span>  <span class="tp">INT</span>            <span class="kw">NOT NULL AUTO_INCREMENT</span>,
+<span class="col">id_pessoa</span>       <span class="tp">INT</span>            <span class="kw">NOT NULL UNIQUE</span>,
+<span class="col">matricula</span>       <span class="tp">VARCHAR</span>(<span class="num">20</span>)    <span class="kw">NOT NULL UNIQUE</span>,
+<span class="col">id_cargo</span>        <span class="tp">INT</span>            <span class="kw">NOT NULL</span>,
+<span class="col">id_departamento</span> <span class="tp">INT</span>            <span class="kw">NOT NULL</span>,
+<span class="col">data_admissao</span>   <span class="tp">DATE</span>           <span class="kw">NOT NULL</span>,
+<span class="col">data_demissao</span>   <span class="tp">DATE</span>           <span class="kw">NULL</span>,
+<span class="col">salario_atual</span>   <span class="tp">DECIMAL</span>(<span class="num">10</span>,<span class="num">2</span>)  <span class="kw">NOT NULL</span>,
+<span class="col">tipo_contrato</span>   <span class="tp">ENUM</span>(<span class="str">‘CLT’</span>,<span class="str">‘PJ’</span>,<span class="str">‘ESTAGIO’</span>,<span class="str">‘TEMPORARIO’</span>) <span class="kw">NOT NULL DEFAULT</span> <span class="str">‘CLT’</span>,
+<span class="col">id_superior</span>     <span class="tp">INT</span>            <span class="kw">NULL</span>,
+<span class="col">status</span>          <span class="tp">ENUM</span>(<span class="str">‘ATIVO’</span>,<span class="str">‘INATIVO’</span>,<span class="str">‘AFASTADO’</span>,<span class="str">‘FERIAS’</span>) <span class="kw">NOT NULL DEFAULT</span> <span class="str">‘ATIVO’</span>,
+<span class="kw">PRIMARY KEY</span> (<span class="col">id_funcionario</span>),
+<span class="kw">CONSTRAINT fk_func_pessoa</span>   <span class="kw">FOREIGN KEY</span> (<span class="col">id_pessoa</span>)       <span class="kw">REFERENCES</span> <span class="tb">pessoa</span>(<span class="col">id_pessoa</span>),
+<span class="kw">CONSTRAINT fk_func_cargo</span>    <span class="kw">FOREIGN KEY</span> (<span class="col">id_cargo</span>)        <span class="kw">REFERENCES</span> <span class="tb">cargo</span>(<span class="col">id_cargo</span>),
+<span class="kw">CONSTRAINT fk_func_depto</span>    <span class="kw">FOREIGN KEY</span> (<span class="col">id_departamento</span>) <span class="kw">REFERENCES</span> <span class="tb">departamento</span>(<span class="col">id_departamento</span>),
+<span class="kw">CONSTRAINT fk_func_superior</span> <span class="kw">FOREIGN KEY</span> (<span class="col">id_superior</span>)     <span class="kw">REFERENCES</span> <span class="tb">funcionario</span>(<span class="col">id_funcionario</span>)
+) <span class="kw">ENGINE</span>=InnoDB;
+
+<span class="cm">-- Agora adiciona FK do gerente no departamento</span>
+<span class="kw">ALTER TABLE</span> <span class="tb">departamento</span> <span class="kw">ADD CONSTRAINT fk_depto_gerente</span> <span class="kw">FOREIGN KEY</span> (<span class="col">id_gerente</span>) <span class="kw">REFERENCES</span> <span class="tb">funcionario</span>(<span class="col">id_funcionario</span>);
+
+<span class="cm">-- ============================================================ --  7. VAGA -- ============================================================</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">vaga</span> (
+<span class="col">id_vaga</span>          <span class="tp">INT</span>            <span class="kw">NOT NULL AUTO_INCREMENT</span>,
+<span class="col">id_cargo</span>         <span class="tp">INT</span>            <span class="kw">NOT NULL</span>,
+<span class="col">id_departamento</span>  <span class="tp">INT</span>            <span class="kw">NOT NULL</span>,
+<span class="col">id_criador</span>       <span class="tp">INT</span>            <span class="kw">NOT NULL</span>,  <span class="cm">-- FK para usuario</span>
+<span class="col">titulo</span>           <span class="tp">VARCHAR</span>(<span class="num">150</span>)   <span class="kw">NOT NULL</span>,
+<span class="col">descricao</span>        <span class="tp">TEXT</span>,
+<span class="col">requisitos</span>       <span class="tp">TEXT</span>,
+<span class="col">qtd_vagas</span>        <span class="tp">INT</span>            <span class="kw">NOT NULL DEFAULT</span> <span class="num">1</span>,
+<span class="col">tipo</span>             <span class="tp">ENUM</span>(<span class="str">‘CLT’</span>,<span class="str">‘PJ’</span>,<span class="str">‘ESTAGIO’</span>,<span class="str">‘TEMPORARIO’</span>),
+<span class="col">salario_ofertado</span> <span class="tp">DECIMAL</span>(<span class="num">10</span>,<span class="num">2</span>),
+<span class="col">data_abertura</span>    <span class="tp">DATE</span>           <span class="kw">NOT NULL</span>,
+<span class="col">data_encerramento</span> <span class="tp">DATE</span>,
+<span class="col">status</span>           <span class="tp">ENUM</span>(<span class="str">‘ABERTA’</span>,<span class="str">‘ENCERRADA’</span>,<span class="str">‘SUSPENSA’</span>,<span class="str">‘PREENCHIDA’</span>) <span class="kw">NOT NULL DEFAULT</span> <span class="str">‘ABERTA’</span>,
+<span class="kw">PRIMARY KEY</span> (<span class="col">id_vaga</span>),
+<span class="kw">CONSTRAINT fk_vaga_cargo</span>  <span class="kw">FOREIGN KEY</span> (<span class="col">id_cargo</span>)        <span class="kw">REFERENCES</span> <span class="tb">cargo</span>(<span class="col">id_cargo</span>),
+<span class="kw">CONSTRAINT fk_vaga_depto</span>  <span class="kw">FOREIGN KEY</span> (<span class="col">id_departamento</span>) <span class="kw">REFERENCES</span> <span class="tb">departamento</span>(<span class="col">id_departamento</span>),
+<span class="kw">CONSTRAINT fk_vaga_criador</span> <span class="kw">FOREIGN KEY</span> (<span class="col">id_criador</span>)     <span class="kw">REFERENCES</span> <span class="tb">usuario</span>(<span class="col">id_usuario</span>)
+) <span class="kw">ENGINE</span>=InnoDB;
+
+<span class="cm">-- ============================================================ --  8. CANDIDATURA -- ============================================================</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">candidatura</span> (
+<span class="col">id_candidatura</span>  <span class="tp">INT</span>            <span class="kw">NOT NULL AUTO_INCREMENT</span>,
+<span class="col">id_usuario</span>      <span class="tp">INT</span>            <span class="kw">NOT NULL</span>,
+<span class="col">id_vaga</span>         <span class="tp">INT</span>            <span class="kw">NOT NULL</span>,
+<span class="col">data_candidatura</span> <span class="tp">TIMESTAMP</span>     <span class="kw">DEFAULT</span> CURRENT_TIMESTAMP,
+<span class="col">status</span>          <span class="tp">ENUM</span>(<span class="str">‘INSCRITO’</span>,<span class="str">‘EM_TRIAGEM’</span>,<span class="str">‘ENTREVISTA’</span>,<span class="str">‘APROVADO’</span>,<span class="str">‘REPROVADO’</span>,<span class="str">‘DESISTIU’</span>) <span class="kw">NOT NULL DEFAULT</span> <span class="str">‘INSCRITO’</span>,
+<span class="col">curriculo_url</span>   <span class="tp">VARCHAR</span>(<span class="num">255</span>),
+<span class="col">carta_motivacao</span> <span class="tp">TEXT</span>,
+<span class="col">nota_triagem</span>    <span class="tp">DECIMAL</span>(<span class="num">4</span>,<span class="num">2</span>),
+<span class="col">id_avaliador</span>    <span class="tp">INT</span>            <span class="kw">NULL</span>,
+<span class="col">obs_avaliador</span>   <span class="tp">TEXT</span>,
+<span class="kw">PRIMARY KEY</span> (<span class="col">id_candidatura</span>),
+<span class="kw">UNIQUE KEY uq_candidatura</span> (<span class="col">id_usuario</span>, <span class="col">id_vaga</span>),
+<span class="kw">CONSTRAINT fk_cand_usuario</span>    <span class="kw">FOREIGN KEY</span> (<span class="col">id_usuario</span>)   <span class="kw">REFERENCES</span> <span class="tb">usuario</span>(<span class="col">id_usuario</span>),
+<span class="kw">CONSTRAINT fk_cand_vaga</span>       <span class="kw">FOREIGN KEY</span> (<span class="col">id_vaga</span>)      <span class="kw">REFERENCES</span> <span class="tb">vaga</span>(<span class="col">id_vaga</span>),
+<span class="kw">CONSTRAINT fk_cand_avaliador</span>  <span class="kw">FOREIGN KEY</span> (<span class="col">id_avaliador</span>) <span class="kw">REFERENCES</span> <span class="tb">usuario</span>(<span class="id_usuario</span>)
+) <span class="kw">ENGINE</span>=InnoDB;
+
+<span class="cm">-- ============================================================ --  9. HISTORICO_SALARIAL -- ============================================================</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">historico_salarial</span> (
+<span class="col">id_historico</span>     <span class="tp">INT</span>            <span class="kw">NOT NULL AUTO_INCREMENT</span>,
+<span class="col">id_funcionario</span>   <span class="tp">INT</span>            <span class="kw">NOT NULL</span>,
+<span class="col">salario_anterior</span> <span class="tp">DECIMAL</span>(<span class="num">10</span>,<span class="num">2</span>),
+<span class="col">salario_novo</span>     <span class="tp">DECIMAL</span>(<span class="num">10</span>,<span class="num">2</span>)  <span class="kw">NOT NULL</span>,
+<span class="col">motivo</span>           <span class="tp">VARCHAR</span>(<span class="num">150</span>),
+<span class="col">id_aprovador</span>     <span class="tp">INT</span>            <span class="kw">NULL</span>,
+<span class="col">data_alteracao</span>   <span class="tp">DATE</span>           <span class="kw">NOT NULL</span>,
+<span class="kw">PRIMARY KEY</span> (<span class="col">id_historico</span>),
+<span class="kw">CONSTRAINT fk_hist_func</span>      <span class="kw">FOREIGN KEY</span> (<span class="col">id_funcionario</span>) <span class="kw">REFERENCES</span> <span class="tb">funcionario</span>(<span class="col">id_funcionario</span>),
+<span class="kw">CONSTRAINT fk_hist_aprovador</span> <span class="kw">FOREIGN KEY</span> (<span class="col">id_aprovador</span>)   <span class="kw">REFERENCES</span> <span class="tb">usuario</span>(<span class="col">id_usuario</span>)
+) <span class="kw">ENGINE</span>=InnoDB;
+
+<span class="cm">-- ============================================================ --  10. AVALIACAO_DESEMPENHO -- ============================================================</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">avaliacao_desempenho</span> (
+<span class="col">id_avaliacao</span>         <span class="tp">INT</span>           <span class="kw">NOT NULL AUTO_INCREMENT</span>,
+<span class="col">id_funcionario</span>       <span class="tp">INT</span>           <span class="kw">NOT NULL</span>,
+<span class="col">id_avaliador</span>         <span class="tp">INT</span>           <span class="kw">NOT NULL</span>,
+<span class="col">periodo_inicio</span>       <span class="tp">DATE</span>          <span class="kw">NOT NULL</span>,
+<span class="col">periodo_fim</span>          <span class="tp">DATE</span>          <span class="kw">NOT NULL</span>,
+<span class="col">nota_tecnica</span>         <span class="tp">DECIMAL</span>(<span class="num">4</span>,<span class="num">2</span>),
+<span class="col">nota_comportamental</span>  <span class="tp">DECIMAL</span>(<span class="num">4</span>,<span class="num">2</span>),
+<span class="col">nota_geral</span>           <span class="tp">DECIMAL</span>(<span class="num">4</span>,<span class="num">2</span>),
+<span class="col">comentarios</span>          <span class="tp">TEXT</span>,
+<span class="col">criado_em</span>            <span class="tp">TIMESTAMP</span>     <span class="kw">DEFAULT</span> CURRENT_TIMESTAMP,
+<span class="kw">PRIMARY KEY</span> (<span class="col">id_avaliacao</span>),
+<span class="kw">CONSTRAINT fk_aval_func</span>      <span class="kw">FOREIGN KEY</span> (<span class="col">id_funcionario</span>) <span class="kw">REFERENCES</span> <span class="tb">funcionario</span>(<span class="col">id_funcionario</span>),
+<span class="kw">CONSTRAINT fk_aval_avaliador</span> <span class="kw">FOREIGN KEY</span> (<span class="col">id_avaliador</span>)   <span class="kw">REFERENCES</span> <span class="tb">funcionario</span>(<span class="col">id_funcionario</span>)
+) <span class="kw">ENGINE</span>=InnoDB;
+
+<span class="cm">-- ============================================================ --  11. TREINAMENTO -- ============================================================</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">treinamento</span> (
+<span class="col">id_treinamento</span>  <span class="tp">INT</span>           <span class="kw">NOT NULL AUTO_INCREMENT</span>,
+<span class="col">nome</span>            <span class="tp">VARCHAR</span>(<span class="num">150</span>)  <span class="kw">NOT NULL</span>,
+<span class="col">descricao</span>       <span class="tp">TEXT</span>,
+<span class="col">modalidade</span>      <span class="tp">ENUM</span>(<span class="str">‘PRESENCIAL’</span>,<span class="str">‘EAD’</span>,<span class="str">‘HIBRIDO’</span>),
+<span class="col">carga_horaria</span>   <span class="tp">INT</span>,
+<span class="col">data_inicio</span>     <span class="tp">DATE</span>,
+<span class="col">data_fim</span>        <span class="tp">DATE</span>,
+<span class="col">custo</span>           <span class="tp">DECIMAL</span>(<span class="num">10</span>,<span class="num">2</span>),
+<span class="kw">PRIMARY KEY</span> (<span class="col">id_treinamento</span>)
+) <span class="kw">ENGINE</span>=InnoDB;
+
+<span class="cm">-- ============================================================ --  12. FUNCIONARIO_TREINAMENTO  (tabela de junção N:M) -- ============================================================</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">funcionario_treinamento</span> (
+<span class="col">id</span>              <span class="tp">INT</span>           <span class="kw">NOT NULL AUTO_INCREMENT</span>,
+<span class="col">id_funcionario</span>  <span class="tp">INT</span>           <span class="kw">NOT NULL</span>,
+<span class="col">id_treinamento</span>  <span class="tp">INT</span>           <span class="kw">NOT NULL</span>,
+<span class="col">status</span>          <span class="tp">ENUM</span>(<span class="str">‘INSCRITO’</span>,<span class="str">‘EM_ANDAMENTO’</span>,<span class="str">‘CONCLUIDO’</span>,<span class="str">‘CANCELADO’</span>) <span class="kw">DEFAULT</span> <span class="str">‘INSCRITO’</span>,
+<span class="col">nota_conclusao</span>  <span class="tp">DECIMAL</span>(<span class="num">4</span>,<span class="num">2</span>),
+<span class="col">data_conclusao</span>  <span class="tp">DATE</span>,
+<span class="col">certificado_url</span> <span class="tp">VARCHAR</span>(<span class="num">255</span>),
+<span class="kw">PRIMARY KEY</span> (<span class="col">id</span>),
+<span class="kw">UNIQUE KEY uq_func_trein</span> (<span class="col">id_funcionario</span>, <span class="col">id_treinamento</span>),
+<span class="kw">CONSTRAINT fk_ft_func</span>  <span class="kw">FOREIGN KEY</span> (<span class="col">id_funcionario</span>) <span class="kw">REFERENCES</span> <span class="tb">funcionario</span>(<span class="col">id_funcionario</span>),
+<span class="kw">CONSTRAINT fk_ft_trein</span> <span class="kw">FOREIGN KEY</span> (<span class="col">id_treinamento</span>) <span class="kw">REFERENCES</span> <span class="tb">treinamento</span>(<span class="col">id_treinamento</span>)
+) <span class="kw">ENGINE</span>=InnoDB;
+
+<span class="cm">-- ============================================================ -- FIM DO SCRIPT -- ============================================================</span></pre>
+  </div>
+</div>
+</main>
+<script>
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('view-' + tab).classList.add('active');
+}
+function copySql() {
+  const text = document.getElementById('sql-content').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = '✓ Copiado!';
+    setTimeout(() => btn.textContent = '⎘ Copiar SQL', 2000);
+  });
+}
+</script>
+</body>
+</html>

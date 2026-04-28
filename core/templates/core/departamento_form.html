@@ -1,0 +1,82 @@
+{% extends "core/base.html" %}
+{% load crispy_forms_tags %}
+{% block title %}{{ titulo }} - Sistema RH{% endblock %}
+{% block content %}
+
+<!-- PAGE HEADER -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="page-title mb-0">
+        <i class="bi bi-building"></i>{{ titulo }}
+    </h1>
+    <a class="btn btn-fb-secondary" href="{% url 'core:dashboard' %}">
+        <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+</div>
+
+<!-- FORM CARD -->
+<div class="card-fb" style="max-width: 500px;">
+    <div class="card-header" style="background: var(--bg-active); border: none;">
+        <h5 class="mb-0" style="color: white; font-weight: 700;">
+            <i class="bi bi-pencil-square"></i> Informações do Departamento
+        </h5>
+    </div>
+    <div class="card-body" style="padding: 2rem;">
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            <!-- NOME -->
+            <div class="mb-3">
+                <label for="id_nome" class="form-label-fb">
+                    <i class="bi bi-building"></i> Nome do Departamento
+                </label>
+                {{ form.nome }}
+                {% if form.nome.errors %}
+                    <div class="alert-fb alert-danger-fb mt-2">{{ form.nome.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- SIGLA -->
+            <div class="mb-4">
+                <label for="id_sigla" class="form-label-fb">
+                    <i class="bi bi-tags"></i> Sigla
+                </label>
+                {{ form.sigla }}
+                <small class="text-muted" style="display: block; margin-top: 0.5rem;">
+                    Exemplo: RH, TI, FIN (máximo 10 caracteres)
+                </small>
+                {% if form.sigla.errors %}
+                    <div class="alert-fb alert-danger-fb mt-2">{{ form.sigla.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- BUTTONS -->
+            <div class="d-flex gap-2" style="margin-top: 2rem;">
+                <button type="submit" class="btn btn-fb-primary" style="padding: 0.875rem 2rem;">
+                    <i class="bi bi-check-circle"></i> Salvar Departamento
+                </button>
+                <a href="{% url 'core:dashboard' %}" class="btn btn-fb-secondary" style="padding: 0.875rem 2rem;">
+                    <i class="bi bi-x-circle"></i> Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    #id_nome, #id_sigla {
+        border: 1px solid #ccc;
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+
+    #id_nome:focus, #id_sigla:focus {
+        border-color: #1877f2;
+        box-shadow: 0 0 0 3px rgba(24, 119, 242, 0.1);
+        outline: none;
+    }
+</style>
+
+{% endblock %}

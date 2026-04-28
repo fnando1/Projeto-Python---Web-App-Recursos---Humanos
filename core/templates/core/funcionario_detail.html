@@ -1,0 +1,15 @@
+{% extends "core/base.html" %}
+{% block content %}
+<div class="container mt-3">
+    <h2>{{ funcionario.nome }}</h2>
+    <dl class="row">
+      <dt class="col-sm-3">CPF</dt><dd class="col-sm-9">{{ funcionario.cpf }}</dd>
+      <dt class="col-sm-3">Cargo</dt><dd class="col-sm-9">{{ funcionario.cargo }}</dd>
+      <dt class="col-sm-3">Departamento</dt><dd class="col-sm-9">{{ funcionario.departamento.nome }}</dd>
+      <dt class="col-sm-3">Salário</dt><dd class="col-sm-9">R$ {{ funcionario.salario }}</dd>
+      <dt class="col-sm-3">Data Admissão</dt><dd class="col-sm-9">{{ funcionario.data_admissao }}</dd>
+    </dl>
+    <a class="btn btn-secondary" href="{% url 'core:funcionario_list' %}">Voltar</a>
+    <a class="btn btn-primary" href="{% url 'core:funcionario_update' funcionario.pk %}">Editar</a>
+</div>
+{% endblock %}

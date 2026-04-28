@@ -1,0 +1,14 @@
+{% extends "core/base.html" %}
+{% block content %}
+<div class="container mt-3">
+    <div class="row mb-3">
+        <div class="col"><h2>Dashboard RH</h2></div>
+    </div>
+    <div class="row g-3">
+        <div class="col-md-4"><div class="card border-primary"><div class="card-body"><h5 class="card-title">Total de Funcionários</h5><p class="card-text display-6">{{ total_funcionarios }}</p></div></div></div>
+        <div class="col-md-4"><div class="card border-success"><div class="card-body"><h5 class="card-title">Gasto com Folha</h5><p class="card-text display-6">R$ {{ total_folha }}</p></div></div></div>
+        <div class="col-md-4"><div class="card border-info"><div class="card-body"><h5 class="card-title">Departamentos</h5><p class="card-text display-6">{{ departamentos.count }}</p></div></div></div>
+    </div>
+    <div class="row mt-4"><div class="col"><a class="btn btn-primary" href="{% url 'core:funcionario_list' %}">Ver Funcionários</a></div></div>
+</div>
+{% endblock %}

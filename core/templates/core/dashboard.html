@@ -1,0 +1,214 @@
+{% extends "core/base.html" %}
+{% block title %}Dashboard - Sistema RH{% endblock %}
+{% block content %}
+
+<!-- PAGE TITLE -->
+<h1 class="page-title">
+    <i class="bi bi-speedometer2"></i>Dashboard RH
+</h1>
+
+<!-- STATS SECTION -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-box">
+            <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
+            <div class="stat-value">{{ total_funcionarios }}</div>
+            <div class="stat-label">Total de Funcionários</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-box stat-success">
+            <div class="stat-icon"><i class="bi bi-cash-coin"></i></div>
+            <div class="stat-value">R$ {{ total_folha|floatformat:2 }}</div>
+            <div class="stat-label">Folha de Pagamento</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-box stat-warning">
+            <div class="stat-icon"><i class="bi bi-building"></i></div>
+            <div class="stat-value">{{ departamentos.count }}</div>
+            <div class="stat-label">Departamentos</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-box stat-danger">
+            <div class="stat-icon"><i class="bi bi-calendar-heart"></i></div>
+            <div class="stat-value">{{ total_ferias_hoje }}</div>
+            <div class="stat-label">Em Férias Hoje</div>
+        </div>
+    </div>
+</div>
+
+<!-- FUNCIONÁRIOS EM FÉRIAS -->
+<div class="card-fb">
+    <div class="card-header">
+        <h5 class="card-title-header mb-0">
+            <i class="bi bi-calendar-heart"></i> Funcionários em Férias
+        </h5>
+    </div>
+    <div class="card-body">
+        {% if ferias_em_andamento %}
+            <div class="table-responsive">
+                <table class="table table-fb mb-0">
+                    <thead>
+                        <tr>
+                            <th>Funcionário</th>
+                            <th>Departamento</th>
+                            <th>Período</th>
+                            <th>Status</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ferias in ferias_em_andamento %}
+                        <tr>
+                            <td><strong>{{ ferias.funcionario.nome }}</strong></td>
+                            <td>
+                                <span class="badge badge-fb badge-primary-fb">
+                                    {{ ferias.funcionario.departamento.sigla }}
+                                </span>
+                            </td>
+                            <td>
+                                {{ ferias.data_inicio|date:"d/m/Y" }} até {{ ferias.data_fim|date:"d/m/Y" }}
+                            </td>
+                            <td>
+                                <span class="badge badge-fb badge-danger-fb">
+                                    🏖️ Em Férias
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{% url 'core:ferias_detail' ferias.pk %}" class="btn btn-sm btn-fb-primary">
+                                    Ver
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert-fb alert-success-fb">
+                <i class="bi bi-check-circle"></i> Nenhum funcionário em férias no momento.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- FÉRIAS PRÓXIMAS -->
+{% if ferias_proximas %}
+<div class="card-fb">
+    <div class="card-header">
+        <h5 class="card-title-header mb-0">
+            <i class="bi bi-calendar-check"></i> Férias Próximas (próximos 30 dias)
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-fb mb-0">
+                <thead>
+                    <tr>
+                        <th>Funcionário</th>
+                        <th>Departamento</th>
+                        <th>Data Início</th>
+                        <th>Duração</th>
+                        <th>Dias para Férias</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ferias in ferias_proximas %}
+                    <tr>
+                        <td><strong>{{ ferias.funcionario.nome }}</strong></td>
+                        <td>
+                            <span class="badge badge-fb badge-primary-fb">
+                                {{ ferias.funcionario.departamento.sigla }}
+                            </span>
+                        </td>
+                        <td>{{ ferias.data_inicio|date:"d/m/Y" }}</td>
+                        <td>
+                            <small>
+                                {{ ferias.data_fim|date:"d/m/Y" }}
+                            </small>
+                        </td>
+                        <td>
+                            <span class="badge badge-fb badge-info-fb">
+                                Em breve
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- FUNCIONÁRIOS RECENTES -->
+<div class="card-fb">
+    <div class="card-header">
+        <h5 class="card-title-header mb-0">
+            <i class="bi bi-people"></i> Funcionários (últimos cadastrados)
+        </h5>
+    </div>
+    <div class="card-body">
+        {% if funcionarios %}
+            <div class="table-responsive">
+                <table class="table table-fb mb-0">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Cargo</th>
+                            <th>Departamento</th>
+                            <th>Salário</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for funcionario in funcionarios|slice:":10" %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'core:funcionario_detail' funcionario.pk %}" style="color: #1877f2; text-decoration: none; font-weight: 600;">
+                                    {{ funcionario.nome }}
+                                </a>
+                            </td>
+                            <td>{{ funcionario.cargo }}</td>
+                            <td>{{ funcionario.departamento.sigla }}</td>
+                            <td style="color: #31a24c; font-weight: 600;">R$ {{ funcionario.salario|floatformat:2 }}</td>
+                            <td>
+                                <a href="{% url 'core:funcionario_detail' funcionario.pk %}" class="btn btn-sm btn-fb-secondary">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert-fb alert-info-fb">
+                <i class="bi bi-info-circle"></i> Nenhum funcionário cadastrado ainda.
+            </div>
+        {% endif %}
+    </div>
+    <div class="card-footer" style="text-align: right;">
+        <a href="{% url 'core:funcionario_list' %}" class="btn btn-fb-primary">
+            <i class="bi bi-arrow-right-circle"></i> Ver Todos
+        </a>
+    </div>
+</div>
+
+<!-- ACTION BUTTONS -->
+<div class="row g-3 mt-3">
+    <div class="col-md-6">
+        <a href="{% url 'core:departamento_create' %}" class="btn btn-fb-primary w-100" style="padding: 0.875rem;">
+            <i class="bi bi-building"></i> Novo Departamento
+        </a>
+    </div>
+    <div class="col-md-6">
+        <a href="{% url 'core:ferias_list' %}" class="btn btn-fb-secondary w-100" style="padding: 0.875rem;">
+            <i class="bi bi-list-task"></i> Ver Todas Férias
+        </a>
+    </div>
+</div>
+
+{% endblock %}
