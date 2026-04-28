@@ -45,47 +45,6 @@ Um sistema completo de Recursos Humanos desenvolvido com Django, PostgreSQL/SQLi
 - ✅ Visualização de métricas formatadas
 - ✅ Filtros por departamento e período
 
-## 🗄️ Modelo de Dados
-
-```
-DEPARTAMENTO (1) ──── (N) FUNCIONARIO ──── (N) FERIAS
-    ├─ id (PK)              ├─ id (PK)          ├─ id (PK)
-    ├─ nome (UK)            ├─ nome             ├─ funcionario_id (FK)
-    └─ sigla (UK)           ├─ cpf (UK)         ├─ data_inicio
-                            ├─ cargo            └─ data_fim
-                            ├─ salario
-                            ├─ data_admissao
-                            └─ departamento_id (FK)
-```
-
-### Validações
-- **CPF:** Formato XXX.XXX.XXX-XX, validação de dígitos
-- **Salário:** Apenas valores positivos
-- **Data Admissão:** Não pode ser data futura
-- **Férias:** Período máximo 30 dias, fim > início
-
-
-## 🧽 Limpeza do Projeto (Atualizado - Abril 2026)
-
-Foram removidos arquivos desnecessários para otimizar o projeto:
-
-- ✅ **Removido:** `core/tests.py` - Arquivo vazio sem testes implementados
-- ✅ **Removido:** `data.json` - Fixture não utilizada
-
-A estrutura agora está mais limpa e mantém apenas os arquivos essenciais para o funcionamento do sistema.
-
----
-
-## 🐳 PostgreSQL com Docker (Novo!)
-
-Arquivos adicionados para facilitar configuração com PostgreSQL:
-
-- 📄 **QUICKSTART_POSTGRES.md** - Guia rápido em 5 minutos
-- 📄 **BANCO_DE_DADOS.md** - Documentação completa do banco
-- 📄 **DIAGRAMA_BANCO.md** - Modelos relacional e físico
-- 📦 **docker-compose.yml** - Configuração Docker
-- 🔧 **setup-docker.ps1** - Script de setup automático
-- .env.postgres - Variáveis de ambiente
 
 **Start rápido:**
 ```powershell
@@ -111,12 +70,6 @@ O sistema possui **tema claro e escuro** com alternância automática:
 - Acentos em indigo (#6366f1)
 - Design noturno confortável para os olhos
 
-### 🔄 Como Alternar
-- **Na Dashboard**: Botão destacado "Tema Claro/Dark" na página principal
-- **Desktop**: Botão "Tema Claro/Dark" na sidebar ou botão flutuante no canto inferior direito
-- **Mobile**: Botão "Tema" no menu hambúrguer ou botão flutuante
-- **Botão Flutuante**: Sempre visível no canto inferior direito da tela
-- **Persistência**: Preferência salva automaticamente no navegador
 
 ### ✨ Melhorias Visuais (Abril 2026)
 - ✅ **Animações suaves**: Fade-in, slide-in e efeitos hover em todas as páginas
@@ -277,89 +230,6 @@ python manage.py runserver
 # Admin: http://127.0.0.1:8000/admin
 ```
 
-#### PostgreSQL (Para produção)
-
-**1. Instale PostgreSQL:**
-
-```bash
-sudo apt update
-sudo apt install postgresql postgresql-contrib -y
-sudo apt install libpq-dev -y  # Necessário para psycopg2
-```
-
-**2. Crie o banco de dados:**
-
-```bash
-# Entre como usuário postgres
-sudo -u postgres psql
-
-# No prompt do PostgreSQL, execute:
-CREATE DATABASE rh_system;
-CREATE USER rh_user WITH PASSWORD 'sua_senha';
-ALTER ROLE rh_user SET client_encoding TO 'utf8';
-ALTER ROLE rh_user SET default_transaction_isolation TO 'read committed';
-ALTER ROLE rh_user SET default_transaction_deferrable TO on;
-ALTER ROLE rh_user SET timezone TO 'UTC';
-GRANT ALL PRIVILEGES ON DATABASE rh_system TO rh_user;
-
-# Digite \q para sair
-```
-
-**3. Configure em `rh_system/settings.py`:**
-
-```python
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'rh_system',
-        'USER': 'rh_user',
-        'PASSWORD': 'sua_senha',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}
-```
-
-**4. Execute os comandos:**
-
-```bash
-python manage.py migrate
-python manage.py createsuperuser
-python manage.py runserver
-```
-
----
-
-### 5️⃣ Acessar a aplicação
-
-Abra seu navegador e acesse:
-
-- **Sistema RH:** http://127.0.0.1:8000
-- **Painel Admin:** http://127.0.0.1:8000/admin (use as credenciais do superusuário)
-
-## 📍 URLs Disponíveis
-
-### Frontend
-| URL | Descrição |
-|-----|-----------|
-| `/` | Dashboard RH |
-| `/funcionarios/` | Lista de funcionários |
-| `/funcionarios/novo/` | Criar funcionário |
-| `/funcionarios/<id>/` | Detalhes do funcionário |
-| `/funcionarios/<id>/editar/` | Editar funcionário |
-| `/funcionarios/<id>/excluir/` | Excluir funcionário |
-| `/ferias/` | Lista de férias |
-| `/ferias/novo/` | Registrar férias |
-| `/ferias/<id>/` | Detalhes das férias |
-| `/ferias/<id>/editar/` | Editar férias |
-| `/ferias/<id>/excluir/` | Excluir férias |
-| `/departamentos/novo/` | Criar departamento |
-
-### Admin
-| URL | Descrição |
-|-----|-----------|
-| `/admin/` | Painel administrativo Django |
-
 ## 💻 Como Usar
 
 ### Criar Funcionário
@@ -388,44 +258,6 @@ Abra seu navegador e acesse:
 3. Confira funcionários em férias
 4. Visualize previsão de férias próximas
 
-## 🔧 Estrutura do Projeto
-
-```
-Projeto_Python_RH/
-├── core/                          # Aplicação principal Django
-│   ├── migrations/                # Migrações do banco
-│   ├── templates/core/            # Templates HTML
-│   │   ├── base.html
-│   │   ├── dashboard.html
-│   │   ├── funcionario_list.html
-│   │   ├── funcionario_form.html
-│   │   ├── funcionario_detail.html
-│   │   ├── ferias_list.html
-│   │   ├── ferias_form.html
-│   │   ├── ferias_detail.html
-│   │   ├── ferias_confirm_delete.html
-│   │   ├── departamento_form.html
-│   │   ├── er_diagram.html
-│   │   └── home.html
-│   ├── admin.py                   # Configuração do admin
-│   ├── forms.py                   # Formulários Django
-│   ├── models.py                  # Modelos de dados
-│   ├── views.py                   # Views/Controladores
-│   ├── urls.py                    # Rotas
-│   ├── apps.py                    # Config da aplicação
-│   └── __init__.py
-├── rh_system/                     # Configurações Django
-│   ├── settings.py
-│   ├── urls.py
-│   ├── wsgi.py
-│   ├── asgi.py
-│   └── __init__.py
-├── manage.py                      # CLI Django
-├── requirements.txt               # Dependências Python
-├── db.sqlite3                     # Banco SQLite (dev)
-├── README.md                      # Este arquivo
-└── .gitignore                     # Git ignore
-```
 
 ## 📦 Dependências
 
@@ -504,11 +336,14 @@ python manage.py runserver 8001  # ou outra porta
 
 ---
 
-## 📄 Licença
 
-MIT License - Veja LICENSE para detalhes
+## 👨‍💻 Autores
 
-## 👨‍💻 Autor
+Felipe Costa da Silva
+Sofia Caldas Sampaio
+Carlos Fabian Lamego Fernandes Junior
+Fernando Peixoto Ferreira
+
 
 Sistema RH desenvolvido como projeto educacional em Django.
 
@@ -519,8 +354,6 @@ Contributions are welcome! Por favor abra uma issue ou pull request.
 ---
 
 **Status:** ✅ Ativo e Funcional  
-**Última atualização:** Abril 2026  
-**Versão:** 1.1 (Com limpeza de arquivos desnecessários)  
-**Compatibilidade:** Windows 10+, Ubuntu 20.04+, macOS
-#   P r o j e t o - P y t h o n - - - W e b - A p p - R e c u r s o s - - - H u m a n o s  
+#   P r o j e t o - P y t h o n - - - W e b - A p p - R e c u r s o s - - - H u m a n o s 
+ 
  
