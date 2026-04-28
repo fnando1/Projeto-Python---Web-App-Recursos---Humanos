@@ -354,6 +354,4 @@ Contributions are welcome! Por favor abra uma issue ou pull request.
 ---
 
 **Status:** ✅ Ativo e Funcional  
-#   P r o j e t o - P y t h o n - - - W e b - A p p - R e c u r s o s - - - H u m a n o s 
- 
- 
+#
