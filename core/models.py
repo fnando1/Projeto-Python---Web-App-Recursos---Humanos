@@ -1,6 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
-from datetime import date
+from datetime import date, timedelta
 import re
 
 def validar_cpf(cpf):
@@ -37,14 +37,14 @@ class Departamento(models.Model):
 class Funcionario(models.Model):
     nome = models.CharField(max_length=120)
     cpf = models.CharField(
-        max_length=14, 
-        unique=True, 
+        max_length=14,
+        unique=True,
         validators=[validar_cpf],
         help_text="CPF no formato XXX.XXX.XXX-XX"
     )
     cargo = models.CharField(max_length=80)
     salario = models.DecimalField(
-        max_digits=12, 
+        max_digits=12,
         decimal_places=2,
         validators=[validar_salario],
         help_text="Salário mensal em reais"
@@ -63,6 +63,23 @@ class Funcionario(models.Model):
     def __str__(self):
         return self.nome
 
+    def get_proxima_aquisicao_ferias(self):
+        """Calcula a próxima data de aquisição de férias com base no histórico."""
+        ultimo_registro = self.ferias.order_by('-data_fim').first()
+        ponto_referencia = self.data_admissao if ultimo_registro is None else ultimo_registro.data_fim
+
+        if ultimo_registro is None:
+            return ponto_referencia + timedelta(days=365)
+
+        dias_tirados = ultimo_registro.dias_ferias()
+        saldo_por_t_roca = max(0, 30 - dias_tirados)
+        desconto = min(12, saldo_por_t_roca)
+        return ponto_referencia + timedelta(days=365 - desconto)
+
+    def get_proxima_ferias_formatada(self):
+        proxima = self.get_proxima_aquisicao_ferias()
+        return proxima.strftime('%Y-%m-%d')
+
 
 class Ferias(models.Model):
     funcionario = models.ForeignKey(Funcionario, on_delete=models.CASCADE, related_name="ferias")
@@ -75,9 +92,22 @@ class Ferias(models.Model):
         verbose_name_plural = "Férias"
 
     def clean(self):
-        """Validação de datas"""
+        """Validação de datas e de sobreposição de períodos."""
         if self.data_fim <= self.data_inicio:
             raise ValidationError("A data de término deve ser após a data de início.")
+
+        if self.funcionario and self.data_inicio and self.data_fim:
+            conflito = self.funcionario.ferias.exclude(pk=self.pk).filter(
+                data_inicio__lte=self.data_fim,
+                data_fim__gte=self.data_inicio,
+            )
+            if conflito.exists():
+                raise ValidationError(
+                    "O período de férias conflita com outro registro para este funcionário."
+                )
+
+    def dias_ferias(self):
+        return (self.data_fim - self.data_inicio).days + 1
 
     def __str__(self):
         return f"Férias de {self.funcionario.nome}: {self.data_inicio} a {self.data_fim}"

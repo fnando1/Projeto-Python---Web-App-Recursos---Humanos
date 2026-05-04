@@ -23,6 +23,13 @@
     <div class="card-body" style="padding: 2rem;">
         <form method="post" novalidate>
             {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="alert-fb alert-danger-fb mb-3">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
             
             <!-- NOME -->
             <div class="mb-3">

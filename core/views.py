@@ -73,6 +73,22 @@ def funcionario_detail(request, pk):
     return render(request, "core/funcionario_detail.html", {"funcionario": funcionario})
 
 
+def funcionario_create(request):
+    """Cria um novo funcionário."""
+    if request.method == "POST":
+        form = FuncionarioForm(request.POST)
+        if form.is_valid():
+            try:
+                funcionario = form.save()
+                messages.success(request, "Funcionário criado com sucesso!")
+                return redirect("core:funcionario_detail", pk=funcionario.pk)
+            except ValidationError as e:
+                form.add_error(None, e)
+    else:
+        form = FuncionarioForm()
+    return render(request, "core/funcionario_form.html", {"form": form, "titulo": "Novo Funcionário"})
+
+
 def funcionario_update(request, pk):
     """Atualiza os dados de um funcionário."""
     funcionario = get_object_or_404(Funcionario, pk=pk)
@@ -84,21 +100,7 @@ def funcionario_update(request, pk):
                 messages.success(request, "Funcionário atualizado com sucesso!")
                 return redirect("core:funcionario_detail", pk=funcionario.pk)
             except ValidationError as e:
-                messages.error(request, f"Erro ao atualizar funcionário: {e.message}")
-    else:
-        form = FuncionarioForm(instance=funcionario)
-    return render(request, "core/funcionario_form.html", {"form": form, "titulo": "Editar Funcionário"})
-    """Atualiza os dados de um funcionário."""
-    funcionario = get_object_or_404(Funcionario, pk=pk)
-    if request.method == "POST":
-        form = FuncionarioForm(request.POST, instance=funcionario)
-        if form.is_valid():
-            try:
-                form.save()
-                messages.success(request, "Funcionário atualizado com sucesso!")
-                return redirect("core:funcionario_detail", pk=funcionario.pk)
-            except ValidationError as e:
-                messages.error(request, f"Erro ao atualizar funcionário: {e.message}")
+                form.add_error(None, e)
     else:
         form = FuncionarioForm(instance=funcionario)
     return render(request, "core/funcionario_form.html", {"form": form, "titulo": "Editar Funcionário"})
@@ -133,6 +135,28 @@ def departamento_create(request):
     return render(request, "core/departamento_form.html", {"form": form, "titulo": "Novo Departamento"})
 
 
+def ferias_create(request, funcionario_pk=None):
+    """Registra um novo período de férias para um funcionário."""
+    funcionario = None
+    if funcionario_pk is not None:
+        funcionario = get_object_or_404(Funcionario, pk=funcionario_pk)
+
+    if request.method == "POST":
+        form = FeriasForm(request.POST)
+        if form.is_valid():
+            try:
+                ferias = form.save()
+                messages.success(request, "Período de férias registrado com sucesso!")
+                return redirect("core:ferias_detail", pk=ferias.pk)
+            except ValidationError as e:
+                form.add_error(None, e)
+    else:
+        initial = {"funcionario": funcionario} if funcionario else {}
+        form = FeriasForm(initial=initial)
+
+    return render(request, "core/ferias_form.html", {"form": form, "titulo": "Registrar Férias"})
+
+
 def ferias_list(request):
     """Lista férias de todos os funcionários."""
     search = request.GET.get("search", "")
@@ -155,13 +179,6 @@ def ferias_detail(request, pk):
         "ferias": ferias,
         "dias_ferias": dias_ferias,
     })
-    """Exibe os detalhes de um período de férias."""
-    ferias = get_object_or_404(Ferias, pk=pk)
-    dias_ferias = (ferias.data_fim - ferias.data_inicio).days
-    return render(request, "core/ferias_detail.html", {
-        "ferias": ferias,
-        "dias_ferias": dias_ferias,
-    })
 
 
 def ferias_update(request, pk):
@@ -175,7 +192,7 @@ def ferias_update(request, pk):
                 messages.success(request, "Período de férias atualizado com sucesso!")
                 return redirect("core:ferias_detail", pk=ferias.pk)
             except ValidationError as e:
-                messages.error(request, f"Erro ao atualizar férias: {e.message}")
+                form.add_error(None, e)
     else:
         form = FeriasForm(instance=ferias)
     return render(request, "core/ferias_form.html", {"form": form, "titulo": "Editar Férias"})

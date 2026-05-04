@@ -37,6 +37,14 @@
 </div>
 
 <!-- LISTA DE FUNCIONÁRIOS -->
+<div class="card-fb mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h2 class="mb-0">Lista de Funcionários</h2>
+        <a href="{% url 'core:funcionario_create' %}" class="btn btn-fb-primary">
+            <i class="bi bi-plus-circle"></i> Novo Funcionário
+        </a>
+    </div>
+</div>
 <div class="card-fb">
     {% if funcionarios %}
         <div class="table-responsive">
@@ -77,6 +85,9 @@
                             </a>
                             <a href="{% url 'core:funcionario_update' f.pk %}" class="btn btn-sm btn-fb-secondary" title="Editar">
                                 <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'core:funcionario_ferias_create' f.pk %}" class="btn btn-sm btn-fb-success" title="Registrar Férias">
+                                <i class="bi bi-calendar-plus"></i>
                             </a>
                             <a href="{% url 'core:funcionario_delete' f.pk %}" class="btn btn-sm btn-fb-danger" title="Deletar">
                                 ❌

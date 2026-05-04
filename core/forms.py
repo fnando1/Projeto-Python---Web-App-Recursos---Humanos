@@ -32,7 +32,7 @@ class FuncionarioForm(forms.ModelForm):
         if cpf_limpo == cpf_limpo[0] * 11:
             raise ValidationError("CPF inválido: todos os dígitos são iguais.")
         
-        return cpf
+        return cpf_limpo
 
     def clean_salario(self):
         salario = self.cleaned_data.get("salario")
@@ -45,6 +45,14 @@ class FuncionarioForm(forms.ModelForm):
         if len(nome) < 3:
             raise ValidationError("O nome deve ter no mínimo 3 caracteres.")
         return nome
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.full_clean()
+        if commit:
+            instance.save()
+            self.save_m2m()
+        return instance
 
 
 class DepartamentoForm(forms.ModelForm):
@@ -75,6 +83,14 @@ class DepartamentoForm(forms.ModelForm):
             raise ValidationError("O nome deve ter no mínimo 3 caracteres.")
         return nome
 
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.full_clean()
+        if commit:
+            instance.save()
+            self.save_m2m()
+        return instance
+
 
 class FeriasForm(forms.ModelForm):
     class Meta:
@@ -100,3 +116,11 @@ class FeriasForm(forms.ModelForm):
                 raise ValidationError("O período de férias não pode exceder 30 dias.")
         
         return cleaned_data
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.full_clean()
+        if commit:
+            instance.save()
+            self.save_m2m()
+        return instance

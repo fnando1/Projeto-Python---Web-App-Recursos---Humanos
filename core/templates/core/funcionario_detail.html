@@ -8,8 +8,10 @@
       <dt class="col-sm-3">Departamento</dt><dd class="col-sm-9">{{ funcionario.departamento.nome }}</dd>
       <dt class="col-sm-3">Salário</dt><dd class="col-sm-9">R$ {{ funcionario.salario }}</dd>
       <dt class="col-sm-3">Data Admissão</dt><dd class="col-sm-9">{{ funcionario.data_admissao }}</dd>
+      <dt class="col-sm-3">Próxima aquisição</dt><dd class="col-sm-9">{{ funcionario.get_proxima_ferias_formatada }}</dd>
     </dl>
     <a class="btn btn-secondary" href="{% url 'core:funcionario_list' %}">Voltar</a>
     <a class="btn btn-primary" href="{% url 'core:funcionario_update' funcionario.pk %}">Editar</a>
+    <a class="btn btn-success" href="{% url 'core:funcionario_ferias_create' funcionario.pk %}">Registrar Férias</a>
 </div>
 {% endblock %}
