@@ -55,6 +55,7 @@
                             <th>Funcionário</th>
                             <th>Departamento</th>
                             <th>Período</th>
+                            <th>Tempo Restante</th>
                             <th>Status</th>
                             <th>Ação</th>
                         </tr>
@@ -70,6 +71,11 @@
                             </td>
                             <td>
                                 {{ ferias.data_inicio|date:"d/m/Y" }} até {{ ferias.data_fim|date:"d/m/Y" }}
+                            </td>
+                            <td>
+                                <span class="badge badge-fb badge-info-fb">
+                                    {{ ferias.dias_restantes }} dias restantes
+                                </span>
                             </td>
                             <td>
                                 <span class="badge badge-fb badge-danger-fb">
