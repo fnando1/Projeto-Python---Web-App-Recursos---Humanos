@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="950" height="360" viewBox="0 0 950 360">
+  <rect x="30" y="30" width="260" height="170" rx="12" ry="12" fill="#fff0f5" stroke="#333" stroke-width="2"/>
+  <text x="40" y="60" font-family="Arial" font-size="18" font-weight="bold">Departamento (SQLite)</text>
+  <text x="40" y="90" font-family="Arial" font-size="14">id INTEGER PRIMARY KEY</text>
+  <text x="40" y="115" font-family="Arial" font-size="14">nome VARCHAR(100) UNIQUE</text>
+  <text x="40" y="140" font-family="Arial" font-size="14">sigla VARCHAR(10) UNIQUE</text>
+
+  <rect x="350" y="20" width="260" height="240" rx="12" ry="12" fill="#f0fff0" stroke="#333" stroke-width="2"/>
+  <text x="360" y="60" font-family="Arial" font-size="18" font-weight="bold">Funcionario (SQLite)</text>
+  <text x="360" y="90" font-family="Arial" font-size="14">id INTEGER PRIMARY KEY</text>
+  <text x="360" y="115" font-family="Arial" font-size="14">nome VARCHAR(120)</text>
+  <text x="360" y="140" font-family="Arial" font-size="14">cpf VARCHAR(14) UNIQUE</text>
+  <text x="360" y="165" font-family="Arial" font-size="14">cargo VARCHAR(80)</text>
+  <text x="360" y="190" font-family="Arial" font-size="14">salario DECIMAL(12,2)</text>
+  <text x="360" y="215" font-family="Arial" font-size="14">data_admissao DATE</text>
+  <text x="360" y="240" font-family="Arial" font-size="14">departamento_id INTEGER FK</text>
+
+  <rect x="670" y="30" width="260" height="150" rx="12" ry="12" fill="#ffffe0" stroke="#333" stroke-width="2"/>
+  <text x="680" y="60" font-family="Arial" font-size="18" font-weight="bold">Ferias (SQLite)</text>
+  <text x="680" y="90" font-family="Arial" font-size="14">id INTEGER PRIMARY KEY</text>
+  <text x="680" y="115" font-family="Arial" font-size="14">funcionario_id INTEGER FK</text>
+  <text x="680" y="140" font-family="Arial" font-size="14">data_inicio DATE</text>
+  <text x="680" y="165" font-family="Arial" font-size="14">data_fim DATE</text>
+
+  <line x1="290" y1="120" x2="350" y2="120" stroke="#555" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="610" y1="130" x2="670" y2="130" stroke="#555" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="170" y="28" font-family="Arial" font-size="12" text-anchor="middle">1</text>
+  <text x="340" y="28" font-family="Arial" font-size="12" text-anchor="middle">*</text>
+  <text x="470" y="118" font-family="Arial" font-size="12" text-anchor="middle">1</text>
+  <text x="660" y="118" font-family="Arial" font-size="12" text-anchor="middle">*</text>
+
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="10" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#555"/>
+    </marker>
+  </defs>
+</svg>

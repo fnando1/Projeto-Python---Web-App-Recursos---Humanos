@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="950" height="360" viewBox="0 0 950 360">
+  <rect x="30" y="30" width="260" height="170" rx="12" ry="12" fill="#e8f4ff" stroke="#333" stroke-width="2"/>
+  <text x="40" y="60" font-family="Arial" font-size="18" font-weight="bold">Departamento</text>
+  <text x="40" y="90" font-family="Arial" font-size="14">+ id : PK</text>
+  <text x="40" y="115" font-family="Arial" font-size="14">+ nome : varchar(100)</text>
+  <text x="40" y="140" font-family="Arial" font-size="14">+ sigla : varchar(10)</text>
+  
+  <rect x="350" y="20" width="260" height="230" rx="12" ry="12" fill="#e6ffe8" stroke="#333" stroke-width="2"/>
+  <text x="360" y="60" font-family="Arial" font-size="18" font-weight="bold">Funcionario</text>
+  <text x="360" y="90" font-family="Arial" font-size="14">+ id : PK</text>
+  <text x="360" y="115" font-family="Arial" font-size="14">+ nome : varchar(120)</text>
+  <text x="360" y="140" font-family="Arial" font-size="14">+ cpf : varchar(14)</text>
+  <text x="360" y="165" font-family="Arial" font-size="14">+ cargo : varchar(80)</text>
+  <text x="360" y="190" font-family="Arial" font-size="14">+ salario : decimal(12,2)</text>
+  <text x="360" y="215" font-family="Arial" font-size="14">+ data_admissao : date</text>
+  <text x="360" y="240" font-family="Arial" font-size="14">+ departamento_id : FK</text>
+
+  <rect x="670" y="30" width="260" height="150" rx="12" ry="12" fill="#fff4e6" stroke="#333" stroke-width="2"/>
+  <text x="680" y="60" font-family="Arial" font-size="18" font-weight="bold">Ferias</text>
+  <text x="680" y="90" font-family="Arial" font-size="14">+ id : PK</text>
+  <text x="680" y="115" font-family="Arial" font-size="14">+ funcionario_id : FK</text>
+  <text x="680" y="140" font-family="Arial" font-size="14">+ data_inicio : date</text>
+  <text x="680" y="165" font-family="Arial" font-size="14">+ data_fim : date</text>
+
+  <line x1="290" y1="120" x2="350" y2="120" stroke="#555" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="610" y1="130" x2="670" y2="130" stroke="#555" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="170" y="28" font-family="Arial" font-size="12" text-anchor="middle">1</text>
+  <text x="340" y="28" font-family="Arial" font-size="12" text-anchor="middle">*</text>
+  <text x="470" y="118" font-family="Arial" font-size="12" text-anchor="middle">1</text>
+  <text x="660" y="118" font-family="Arial" font-size="12" text-anchor="middle">*</text>
+
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="10" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#555"/>
+    </marker>
+  </defs>
+</svg>

@@ -3,6 +3,41 @@ from django.utils.html import format_html
 from .models import Departamento, Funcionario, Ferias
 
 
+class FeriasInline(admin.TabularInline):
+    model = Ferias
+    extra = 0
+    fields = ("data_inicio", "data_fim", "get_dias_ferias", "get_status_ferias")
+    readonly_fields = ("get_dias_ferias", "get_status_ferias")
+    show_change_link = True
+    verbose_name = "Férias do Funcionário"
+    verbose_name_plural = "Histórico de Férias"
+
+    def get_dias_ferias(self, obj):
+        return obj.dias_ferias()
+    get_dias_ferias.short_description = "Dias de Férias"
+
+    def get_status_ferias(self, obj):
+        from datetime import date
+        hoje = date.today()
+
+        if obj.data_inicio > hoje:
+            status = "Planejadas"
+            cor = "#FFC107"
+        elif obj.data_fim < hoje:
+            status = "Finalizada"
+            cor = "#4CAF50"
+        else:
+            status = "Em Andamento"
+            cor = "#2196F3"
+
+        return format_html(
+            '<span style="background-color: {}; color: white; padding: 5px 10px; border-radius: 3px; font-weight: bold;">{}</span>',
+            cor,
+            status
+        )
+    get_status_ferias.short_description = "Status"
+
+
 @admin.register(Departamento)
 class DepartamentoAdmin(admin.ModelAdmin):
     list_display = ("nome", "sigla", "get_total_funcionarios")
@@ -25,11 +60,21 @@ class DepartamentoAdmin(admin.ModelAdmin):
 
 @admin.register(Funcionario)
 class FuncionarioAdmin(admin.ModelAdmin):
-    list_display = ("nome", "cpf", "cargo", "departamento", "get_salario_formatado", "data_admissao")
+    list_display = (
+        "nome",
+        "cpf",
+        "cargo",
+        "departamento",
+        "get_salario_formatado",
+        "data_admissao",
+        "get_proxima_ferias_formatada",
+    )
     list_filter = ("departamento", "data_admissao")
     search_fields = ("nome", "cpf", "cargo")
-    readonly_fields = ("get_salario_bruto", "get_dias_na_empresa")
-    
+    readonly_fields = ("get_salario_bruto", "get_dias_na_empresa", "get_proxima_ferias_formatada")
+    list_select_related = ("departamento",)
+    inlines = [FeriasInline]
+
     fieldsets = (
         ("Dados Pessoais", {
             "fields": ("nome", "cpf"),
@@ -38,7 +83,11 @@ class FuncionarioAdmin(admin.ModelAdmin):
             "fields": ("cargo", "departamento", "data_admissao", "salario"),
         }),
         ("Estatísticas", {
-            "fields": ("get_salario_bruto", "get_dias_na_empresa"),
+            "fields": (
+                "get_salario_bruto",
+                "get_dias_na_empresa",
+                "get_proxima_ferias_formatada",
+            ),
             "classes": ("collapse",),
         }),
     )
@@ -71,31 +120,42 @@ class FuncionarioAdmin(admin.ModelAdmin):
         )
     get_dias_na_empresa.short_description = "Tempo na Empresa"
 
+    def get_proxima_ferias_formatada(self, obj):
+        """Exibe a data prevista da próxima aquisição de férias."""
+        proxima = obj.get_proxima_aquisicao_ferias()
+        return format_html(
+            '<span style="color: #1565c0; font-weight: bold;">{}</span>',
+            proxima.strftime('%Y-%m-%d')
+        )
+    get_proxima_ferias_formatada.short_description = "Próxima aquisição"
+
 
 @admin.register(Ferias)
 class FeriasAdmin(admin.ModelAdmin):
     list_display = ("funcionario", "data_inicio", "data_fim", "get_dias_ferias", "get_status_ferias")
     list_filter = ("data_inicio", "funcionario__departamento")
     search_fields = ("funcionario__nome",)
-    readonly_fields = ("get_dias_ferias",)
-    
+    readonly_fields = ("get_dias_ferias", "get_status_ferias")
+    date_hierarchy = "data_inicio"
+    list_select_related = ("funcionario",)
+
     fieldsets = (
         ("Informações", {
             "fields": ("funcionario", "data_inicio", "data_fim", "get_dias_ferias"),
         }),
     )
-    
+
     def get_dias_ferias(self, obj):
         """Calcula o número de dias de férias."""
         dias = (obj.data_fim - obj.data_inicio).days + 1
         return dias
     get_dias_ferias.short_description = "Dias de Férias"
-    
+
     def get_status_ferias(self, obj):
         """Exibe o status das férias (Planejadas, Em andamento, Finalizada)."""
         from datetime import date
         hoje = date.today()
-        
+
         if obj.data_inicio > hoje:
             status = "Planejadas"
             cor = "#FFC107"
@@ -105,7 +165,7 @@ class FeriasAdmin(admin.ModelAdmin):
         else:
             status = "Em Andamento"
             cor = "#2196F3"
-        
+
         return format_html(
             '<span style="background-color: {}; color: white; padding: 5px 10px; border-radius: 3px; font-weight: bold;">{}</span>',
             cor,
