@@ -26,6 +26,14 @@
 </div>
 
 <!-- LISTA DE FÉRIAS -->
+<div class="card-fb mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h2 class="mb-0">Lista de Férias</h2>
+        <a href="{% url 'core:ferias_create' %}" class="btn btn-fb-success">
+            <i class="bi bi-calendar-plus"></i> Registrar Férias
+        </a>
+    </div>
+</div>
 <div class="card-fb">
     {% if ferias %}
         <div class="table-responsive">
