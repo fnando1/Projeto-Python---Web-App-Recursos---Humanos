@@ -25,9 +25,9 @@ SECRET_KEY = "django-insecure-%iy+%o*ugk*_#ny7rjtmn_9ak*jkhz#=8$nnfdv&bu_-7)natp
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['fuzzy-chainsaw-4j7p66466px6c5gxp-8001.app.github.dev', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['.app.github.dev', 'localhost', '127.0.0.1']
 
-CSRF_TRUSTED_ORIGINS = ['https://fuzzy-chainsaw-4j7p66466px6c5gxp-8001.app.github.dev', 'https://localhost:8001']
+CSRF_TRUSTED_ORIGINS = ['https://*.app.github.dev', 'https://localhost:8000', 'https://localhost:8001']
 
 
 # Application definition

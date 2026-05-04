@@ -82,10 +82,6 @@
             --info-bg: #1e2a3a;
             --info-text: #60a5fa;
         }
-            --warning-text: #fbbf24;
-            --info-bg: #1a2e2d;
-            --info-text: #60a5fa;
-        }
 
         * {
             margin: 0;
@@ -763,43 +759,8 @@
 <!-- MAIN CONTENT -->
 <div class="container-fluid p-4">
     <div class="row">
-        <!-- SIDEBAR -->
-        <aside class="col-lg-2 d-none d-lg-block">
-            <div class="sidebar-fb fade-in">
-                <h5><i class="bi bi-list"></i>Menu</h5>
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'core:dashboard' %}">
-                            <i class="bi bi-speedometer2"></i>Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'funcionario_list' %}active{% endif %}" href="{% url 'core:funcionario_list' %}">
-                            <i class="bi bi-people"></i>Funcionários
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'ferias_list' %}active{% endif %}" href="{% url 'core:ferias_list' %}">
-                            <i class="bi bi-calendar"></i>Férias
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'core:departamento_create' %}">
-                            <i class="bi bi-building"></i>Novo Depto
-                        </a>
-                    </li>
-                </ul>
-
-        <!-- THEME TOGGLE BUTTON DESKTOP - REMOVIDO -->
-
-
-                <hr>
-                <small>RH System v1.1<br>2026</small>
-            </div>
-        </aside>
-
         <!-- MAIN AREA -->
-        <main class="col-lg-10 main-container">
+        <main class="col-12 main-container">
             {% if messages %}
                 {% for message in messages %}
                     <div class="alert alert-{{ message.tags }}-fb alert-fb fade-in" role="alert">
