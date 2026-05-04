@@ -109,5 +109,13 @@ class Ferias(models.Model):
     def dias_ferias(self):
         return (self.data_fim - self.data_inicio).days + 1
 
+    def dias_restantes(self):
+        hoje = date.today()
+        if hoje < self.data_inicio:
+            return (self.data_inicio - hoje).days
+        if hoje <= self.data_fim:
+            return (self.data_fim - hoje).days + 1
+        return 0
+
     def __str__(self):
         return f"Férias de {self.funcionario.nome}: {self.data_inicio} a {self.data_fim}"

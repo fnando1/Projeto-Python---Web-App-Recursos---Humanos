@@ -44,16 +44,16 @@
                         <th><i class="bi bi-calendar-check"></i> Data Início</th>
                         <th><i class="bi bi-calendar-x"></i> Data Fim</th>
                         <th><i class="bi bi-calendar2-day"></i> Duração</th>
+                        <th><i class="bi bi-hourglass-split"></i> Dias Restantes</th>
                         <th><i class="bi bi-info-circle"></i> Status</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for ferias in ferias %}
-                    {% with dias=ferias.data_fim|add:ferias.data_inicio %}
                     <tr>
                         <td>
-                            <a href="{% url 'core:ferias_detail' ferias.pk %}" style="color: var(--text-blue); text-decoration: none; font-weight: 600;">
+                            <a href="{% url 'core:ferias_detail' ferias.pk %}" class="employee-name-badge" style="text-decoration: none;">
                                 {{ ferias.funcionario.nome }}
                             </a>
                             <small style="display: block;">
@@ -68,7 +68,12 @@
                         </td>
                         <td>
                             <span class="badge badge-fb badge-info-fb">
-                                {{ dias|add:1 }} dias
+                                {{ ferias.dias_ferias }} dias
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge badge-fb badge-secondary-fb">
+                                {{ ferias.dias_restantes }} dias
                             </span>
                         </td>
                         <td>
@@ -99,7 +104,6 @@
                             </a>
                         </td>
                     </tr>
-                    {% endwith %}
                     {% endfor %}
                 </tbody>
             </table>
