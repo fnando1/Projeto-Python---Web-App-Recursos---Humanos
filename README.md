@@ -347,11 +347,3 @@ python manage.py runserver 8001  # ou outra porta
 
 Sistema RH desenvolvido como projeto educacional em Django.
 
-## 🤝 Contribuições
-
-Contributions are welcome! Por favor abra uma issue ou pull request.
-
----
-
-**Status:** ✅ Ativo e Funcional  
-#
