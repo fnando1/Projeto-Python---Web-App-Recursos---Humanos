@@ -1,4 +1,4 @@
-# 🎯 Sistema RH - Django
+#  Sistema RH - Django
 
 Um sistema completo de Recursos Humanos desenvolvido com Django, PostgreSQL/SQLite e Bootstrap 5. Gerencie funcionários, departamentos e período de férias com uma interface moderna e responsiva.
 
